@@ -68,3 +68,10 @@ and compile the code (first compilation in one core, super slow but needed):
 cd $CMSSW_BASE/src
 scram b #-j 32 after the first compilation
 ```
+
+## Run the code
+```bash
+### COMPILE
+cmsRun python/RecoStudies.py
+```
+
