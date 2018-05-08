@@ -97,19 +97,20 @@ class RecoStudies : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
     edm::EDGetTokenT<reco::VertexCollection> vertexToken;
     edm::EDGetTokenT<pat::ElectronCollection> electronToken;
     edm::EDGetTokenT<reco::Jet> recoJetToken;
-  //edm::EDGetToken token_tipo;
-  //const edm::TypeID tipo;
+    //edm::EDGetToken token_tipo;
+    //const edm::TypeID tipo;
     edm::ParameterSet GenPSet;
     edm::ParameterSet CHSJetPSet;
     edm::ParameterSet JetPSet;
-  //edm::ParameterSet RecoJetPSet;
-  //std::string JerName_res;
+    //edm::ParameterSet RecoJetPSet;
+    //std::string JerName_res;
 
     JetAnalyzer* theCHSJetAnalyzer;
     JetAnalyzer* theJetAnalyzer;
     GenAnalyzer* theGenAnalyzer;
 
-    int WriteNElectrons, WriteNMuons, WriteNLeptons, WriteNTaus, WriteNPhotons, WriteNJets, WriteNFatJets, WriteNGenBquarks, WriteNGenLongLiveds;
+    //int WriteNElectrons, WriteNMuons, WriteNLeptons, WriteNTaus, WriteNPhotons, WriteNFatJets;
+    int WriteNJets, WriteNGenBquarks, WriteNGenLongLiveds;
 
     std::vector<JetType> Jets;
     std::vector<JetType> CHSJets;
@@ -120,27 +121,28 @@ class RecoStudies : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
     bool isVerbose;
     bool isMC;
     long int EventNumber, LumiNumber, RunNumber, nPV;
-    float muon1_pt, muon1_pfIso04, electron1_pt, fatjet1_pt, jet1_pt;
-    float met_pt, met_pt_nomu_L, met_pt_nomu_T, m_ht, m_ht_nomu_L, m_ht_nomu_T, min_met_mht, min_met_mht_nomu_L, min_met_mht_nomu_T, met_phi, met_phi_nomu_L, met_phi_nomu_T;
-    bool fatjet1_isLoose, fatjet1_isTight, muon1_isLoose, muon1_isTight;
-    long int nTightMuons, nTightElectrons, nTightFatJets, nLooseMuons, nLooseElectrons, nLooseFatJets, nLooseJets, nTightJets, nJets;
-    bool   trig_bit_pfmet110_pfmht110;
-    bool   trig_bit_pfmet120_pfmht120;
-    bool   trig_bit_pfmet120_pfmht120_PFHT60;
-    bool   trig_bit_pfmet130_pfmht130;
-    bool   trig_bit_pfmet140_pfmht140;
-    bool   trig_bit_pfmetTypeOne110_pfmht110;
-    bool   trig_bit_pfmetTypeOne120_pfmht120;
-    bool   trig_bit_pfmetTypeOne120_pfmht120_PFHT60;
-    bool   trig_bit_pfmetTypeOne130_pfmht130;
-    bool   trig_bit_pfmetTypeOne140_pfmht140;
-    bool   trig_bit_pfmetnomu110_pfmhtnomu110;
-    bool   trig_bit_pfmetnomu120_pfmhtnomu120;
-    bool   trig_bit_pfmetnomu120_pfmhtnomu120_PFHT60;
-    bool   trig_bit_pfmetnomu130_pfmhtnomu130;
-    bool   trig_bit_pfmetnomu140_pfmhtnomu140;
-    bool   trig_bit_ele27_wptight_gsf;
-    bool   trig_bit_isomu24;
+    //float muon1_pt, muon1_pfIso04, electron1_pt, fatjet1_pt, jet1_pt;
+    //float met_pt, met_pt_nomu_L, met_pt_nomu_T, m_ht, m_ht_nomu_L, m_ht_nomu_T, min_met_mht, min_met_mht_nomu_L, min_met_mht_nomu_T, met_phi, met_phi_nomu_L, met_phi_nomu_T;
+    //bool fatjet1_isLoose, fatjet1_isTight, muon1_isLoose, muon1_isTight;
+    //long int nTightMuons, nTightElectrons, nTightFatJets, nLooseMuons, nLooseElectrons, nLooseFatJets;
+    long int nLooseJets, nTightJets, nJets, nLooseCHSJets, nTightCHSJets, nCHSJets, nGenBquarks, nGenLL;
+    //bool   trig_bit_pfmet110_pfmht110;
+    //bool   trig_bit_pfmet120_pfmht120;
+    //bool   trig_bit_pfmet120_pfmht120_PFHT60;
+    //bool   trig_bit_pfmet130_pfmht130;
+    //bool   trig_bit_pfmet140_pfmht140;
+    //bool   trig_bit_pfmetTypeOne110_pfmht110;
+    //bool   trig_bit_pfmetTypeOne120_pfmht120;
+    //bool   trig_bit_pfmetTypeOne120_pfmht120_PFHT60;
+    //bool   trig_bit_pfmetTypeOne130_pfmht130;
+    //bool   trig_bit_pfmetTypeOne140_pfmht140;
+    //bool   trig_bit_pfmetnomu110_pfmhtnomu110;
+    //bool   trig_bit_pfmetnomu120_pfmhtnomu120;
+    //bool   trig_bit_pfmetnomu120_pfmhtnomu120_PFHT60;
+    //bool   trig_bit_pfmetnomu130_pfmhtnomu130;
+    //bool   trig_bit_pfmetnomu140_pfmhtnomu140;
+    //bool   trig_bit_ele27_wptight_gsf;
+    //bool   trig_bit_isomu24;
     //MET filters
     bool trig_bit_flag_HBHENoiseFilter;
     bool trig_bit_flag_HBHENoiseIsoFilter;
@@ -150,6 +152,46 @@ class RecoStudies : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
     bool trig_bit_flag_globalSuperTightHalo2016Filter;
     bool flag_BadChCand;
     bool flag_BadPFMuon;
+
+    TH1F* Matching_to_b_AK4Jets;
+    TH1F* Matching_to_b_CHSAK4Jets;
+    TH1F* Matching_to_b_AK4Jets_simplified;
+    TH1F* Matching_to_b_CHSAK4Jets_simplified;
+
+    TH1F* Matching_to_pi_AK4Jets;
+    TH1F* Matching_to_pi_CHSAK4Jets;
+
+    TH1F* CSV_AK4Jets_matched_to_0b;
+    TH1F* CSV_CHSAK4Jets_matched_to_0b;
+    TH1F* CSV_AK4Jets_matched_to_1b;
+    TH1F* CSV_CHSAK4Jets_matched_to_1b;
+    TH1F* CSV_AK4Jets_matched_to_2b;
+    TH1F* CSV_CHSAK4Jets_matched_to_2b;
+    TH1F* CSV_AK4Jets_matched_to_more_2b;
+    TH1F* CSV_CHSAK4Jets_matched_to_more_2b;
+
+    TH1F* CSV_AK4Jets_matched_to_0pi;
+    TH1F* CSV_CHSAK4Jets_matched_to_0pi;
+    TH1F* CSV_AK4Jets_matched_to_1pi;
+    TH1F* CSV_CHSAK4Jets_matched_to_1pi;
+    TH1F* CSV_AK4Jets_matched_to_2pi;
+    TH1F* CSV_CHSAK4Jets_matched_to_2pi;
+
+    TH1F* pT_AK4Jets_matched_to_0b;
+    TH1F* pT_CHSAK4Jets_matched_to_0b;
+    TH1F* pT_AK4Jets_matched_to_1b;
+    TH1F* pT_CHSAK4Jets_matched_to_1b;
+    TH1F* pT_AK4Jets_matched_to_2b;
+    TH1F* pT_CHSAK4Jets_matched_to_2b;
+    TH1F* pT_AK4Jets_matched_to_more_2b;
+    TH1F* pT_CHSAK4Jets_matched_to_more_2b;
+
+    TH1F* pT_AK4Jets_matched_to_0pi;
+    TH1F* pT_CHSAK4Jets_matched_to_0pi;
+    TH1F* pT_AK4Jets_matched_to_1pi;
+    TH1F* pT_CHSAK4Jets_matched_to_1pi;
+    TH1F* pT_AK4Jets_matched_to_2pi;
+    TH1F* pT_CHSAK4Jets_matched_to_2pi;
 };
 
 
@@ -179,6 +221,7 @@ RecoStudies::RecoStudies(const edm::ParameterSet& iConfig):
     theCHSJetAnalyzer      = new JetAnalyzer(CHSJetPSet, consumesCollector());
     theJetAnalyzer      = new JetAnalyzer(JetPSet, consumesCollector());
     theGenAnalyzer      = new GenAnalyzer(GenPSet, consumesCollector());
+
 
     //Input tags
     edm::InputTag IT_trigResults = edm::InputTag("TriggerResults::HLT");
@@ -214,60 +257,70 @@ RecoStudies::RecoStudies(const edm::ParameterSet& iConfig):
 
     //isVerbose = iConfig.getParameter<bool> ("verbose");
 
+    if(isVerbose) std::cout << "CONSTRUCTOR" << std::endl;
+
     //now do what ever initialization is needed
     usesResource("TFileService");
 
     edm::Service<TFileService> fs;
+
+    //Tree branches
     tree = fs->make<TTree>("tree", "tree");
     tree -> Branch("isMC" , &isMC, "isMC/O");
     tree -> Branch("EventNumber" , &EventNumber , "EventNumber/L");
     tree -> Branch("LumiNumber" , &LumiNumber , "LumiNumber/L");
     tree -> Branch("RunNumber" , &RunNumber , "RunNumber/L");
-    tree -> Branch("nPV" , &nPV , "nPV/L");
-    tree -> Branch("nLooseMuons" , &nLooseMuons , "nLooseMuons/L");
-    tree -> Branch("nLooseElectrons" , &nLooseElectrons , "nLooseElectrons/L");
-    tree -> Branch("nLooseFatJets" , &nLooseFatJets , "nLooseFatJets/L");
+    //tree -> Branch("nPV" , &nPV , "nPV/L");
+    //tree -> Branch("nLooseMuons" , &nLooseMuons , "nLooseMuons/L");
+    //tree -> Branch("nLooseElectrons" , &nLooseElectrons , "nLooseElectrons/L");
+    //tree -> Branch("nLooseFatJets" , &nLooseFatJets , "nLooseFatJets/L");
+    tree -> Branch("nGenBquarks" , &nGenBquarks , "nGenBquarks/L");
+    tree -> Branch("nGenLL" , &nGenLL , "nGenLL/L");
+    tree -> Branch("nJets" , &nJets , "nJets/L");
     tree -> Branch("nLooseJets" , &nLooseJets , "nLooseJets/L");
-    tree -> Branch("nTightMuons" , &nTightMuons , "nTightMuons/L");
-    tree -> Branch("nTightElectrons" , &nTightElectrons , "nTightElectrons/L");
-    tree -> Branch("nTightFatJets" , &nTightFatJets , "nTightFatJets/L");
     tree -> Branch("nTightJets" , &nTightJets , "nTightJets/L");
-    tree -> Branch("Muon1_pt", &muon1_pt, "Muon1_pt/F");
-    tree -> Branch("Muon1_isLoose", &muon1_isLoose, "Muon1_isLoose/B");
-    tree -> Branch("Muon1_isTight", &muon1_isTight, "Muon1_isTight/B");
-    tree -> Branch("Muon1_pfIso04", &muon1_pfIso04, "Muon1_pfIso04/F");
-    tree -> Branch("Electron1_pt", &electron1_pt, "Electron1_pt/F");
-    tree -> Branch("FatJet1_pt", &fatjet1_pt, "FatJet1_pt/F");
-    tree -> Branch("FatJet1_isLoose", &fatjet1_isLoose, "FatJet1_isLoose/B");
-    tree -> Branch("FatJet1_isTight", &fatjet1_isTight, "FatJet1_isTight/B");
-    tree -> Branch("Jet1_pt", &jet1_pt, "Jet1_pt/F");
-    tree -> Branch("MEt_pt", &met_pt, "MEt_pt/F");
-    tree -> Branch("MEt_phi", &met_phi, "MEt_phi/F");
-    tree -> Branch("m_ht", &m_ht, "m_ht/F");
-    tree -> Branch("m_ht_nomu_L", &m_ht_nomu_L, "m_ht_nomu_L/F");
-    tree -> Branch("m_ht_nomu_T", &m_ht_nomu_T, "m_ht_nomu_T/F");
-    tree -> Branch("min_met_mht", &min_met_mht, "min_met_mht/F");
-    tree -> Branch("met_pt_nomu_L", &met_pt_nomu_L, "met_pt_nomu_L/F");
-    tree -> Branch("met_pt_nomu_T", &met_pt_nomu_T, "met_pt_nomu_T/F");
-    tree -> Branch("min_met_mht_nomu_L", &min_met_mht_nomu_L, "min_met_mht_nomu_L/F");
-    tree -> Branch("min_met_mht_nomu_T", &min_met_mht_nomu_T, "min_met_mht_nomu_T/F");
-    tree -> Branch("HLT_PFMET110_PFMHT110_IDTight_v", &trig_bit_pfmet110_pfmht110, "HLT_PFMET110_PFMHT110_IDTight_v/B");
-    tree -> Branch("HLT_PFMET120_PFMHT120_IDTight_v", &trig_bit_pfmet120_pfmht120, "HLT_PFMET120_PFMHT120_IDTight_v/B");
-    tree -> Branch("HLT_PFMET120_PFMHT120_IDTight_PFHT60_v", &trig_bit_pfmet120_pfmht120_PFHT60, "HLT_PFMET120_PFMHT120_IDTight_PFHT60_v/B");
-    tree -> Branch("HLT_PFMET130_PFMHT130_IDTight_v", &trig_bit_pfmet130_pfmht130, "HLT_PFMET130_PFMHT130_IDTight_v/B");
-    tree -> Branch("HLT_PFMET140_PFMHT140_IDTight_v", &trig_bit_pfmet140_pfmht140, "HLT_PFMET140_PFMHT140_IDTight_v/B");
-    tree -> Branch("HLT_PFMETTypeOne110_PFMHT110_IDTight_v", &trig_bit_pfmetTypeOne110_pfmht110, "HLT_PFMETTypeOne110_PFMHT110_IDTight_v/B");
-    tree -> Branch("HLT_PFMETTypeOne120_PFMHT120_IDTight_v", &trig_bit_pfmetTypeOne120_pfmht120, "HLT_PFMETTypeOne120_PFMHT120_IDTight_v/B");
-    tree -> Branch("HLT_PFMETTypeOne120_PFMHT120_IDTight_PFHT60_v", &trig_bit_pfmetTypeOne120_pfmht120_PFHT60, "HLT_PFMETTypeOne120_PFMHT120_IDTight_PFHT60_v/B");
-    tree -> Branch("HLT_PFMETTypeOne130_PFMHT130_IDTight_v", &trig_bit_pfmetTypeOne130_pfmht130, "HLT_PFMETTypeOne130_PFMHT130_IDTight_v/B");
-    tree -> Branch("HLT_PFMETTypeOne140_PFMHT140_IDTight_v", &trig_bit_pfmetTypeOne140_pfmht140, "HLT_PFMETTypeOne140_PFMHT140_IDTight_v/B");
-    tree -> Branch("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v", &trig_bit_pfmetnomu110_pfmhtnomu110, "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v/B");
-    tree -> Branch("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v", &trig_bit_pfmetnomu120_pfmhtnomu120, "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v/B");
-    tree -> Branch("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_v", &trig_bit_pfmetnomu120_pfmhtnomu120_PFHT60, "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_v/B");
-    tree -> Branch("HLT_PFMETNoMu130_PFMHTNoMu130_IDTight_v", &trig_bit_pfmetnomu130_pfmhtnomu130, "HLT_PFMETNoMu130_PFMHTNoMu130_IDTight_v/B");
-    tree -> Branch("HLT_PFMETNoMu140_PFMHTNoMu140_IDTight_v", &trig_bit_pfmetnomu140_pfmhtnomu140, "HLT_PFMETNoMu140_PFMHTNoMu140_IDTight_v/B");
-    tree -> Branch("HLT_Ele27_WPTight_Gsf_v", &trig_bit_ele27_wptight_gsf, "HLT_Ele27_WPTight_Gsf_v/B");
-    tree -> Branch("HLT_IsoMu24_v", &trig_bit_isomu24, "HLT_IsoMu24_v/B");
+    tree -> Branch("nCHSJets" , &nCHSJets , "nCHSJets/L");
+    tree -> Branch("nLooseCHSJets" , &nLooseCHSJets , "nLooseCHSJets/L");
+    tree -> Branch("nTightCHSJets" , &nTightCHSJets , "nTightCHSJets/L");
+    //tree -> Branch("nTightMuons" , &nTightMuons , "nTightMuons/L");
+    //tree -> Branch("nTightElectrons" , &nTightElectrons , "nTightElectrons/L");
+    //tree -> Branch("nTightFatJets" , &nTightFatJets , "nTightFatJets/L");
+    //tree -> Branch("Muon1_pt", &muon1_pt, "Muon1_pt/F");
+    //tree -> Branch("Muon1_isLoose", &muon1_isLoose, "Muon1_isLoose/B");
+    //tree -> Branch("Muon1_isTight", &muon1_isTight, "Muon1_isTight/B");
+    //tree -> Branch("Muon1_pfIso04", &muon1_pfIso04, "Muon1_pfIso04/F");
+    //tree -> Branch("Electron1_pt", &electron1_pt, "Electron1_pt/F");
+    //tree -> Branch("FatJet1_pt", &fatjet1_pt, "FatJet1_pt/F");
+    //tree -> Branch("FatJet1_isLoose", &fatjet1_isLoose, "FatJet1_isLoose/B");
+    //tree -> Branch("FatJet1_isTight", &fatjet1_isTight, "FatJet1_isTight/B");
+    //tree -> Branch("Jet1_pt", &jet1_pt, "Jet1_pt/F");
+    //tree -> Branch("MEt_pt", &met_pt, "MEt_pt/F");
+    //tree -> Branch("MEt_phi", &met_phi, "MEt_phi/F");
+    //tree -> Branch("m_ht", &m_ht, "m_ht/F");
+    //tree -> Branch("m_ht_nomu_L", &m_ht_nomu_L, "m_ht_nomu_L/F");
+    //tree -> Branch("m_ht_nomu_T", &m_ht_nomu_T, "m_ht_nomu_T/F");
+    //tree -> Branch("min_met_mht", &min_met_mht, "min_met_mht/F");
+    //tree -> Branch("met_pt_nomu_L", &met_pt_nomu_L, "met_pt_nomu_L/F");
+    //tree -> Branch("met_pt_nomu_T", &met_pt_nomu_T, "met_pt_nomu_T/F");
+    //tree -> Branch("min_met_mht_nomu_L", &min_met_mht_nomu_L, "min_met_mht_nomu_L/F");
+    //tree -> Branch("min_met_mht_nomu_T", &min_met_mht_nomu_T, "min_met_mht_nomu_T/F");
+    //tree -> Branch("HLT_PFMET110_PFMHT110_IDTight_v", &trig_bit_pfmet110_pfmht110, "HLT_PFMET110_PFMHT110_IDTight_v/B");
+    //tree -> Branch("HLT_PFMET120_PFMHT120_IDTight_v", &trig_bit_pfmet120_pfmht120, "HLT_PFMET120_PFMHT120_IDTight_v/B");
+    //tree -> Branch("HLT_PFMET120_PFMHT120_IDTight_PFHT60_v", &trig_bit_pfmet120_pfmht120_PFHT60, "HLT_PFMET120_PFMHT120_IDTight_PFHT60_v/B");
+    //tree -> Branch("HLT_PFMET130_PFMHT130_IDTight_v", &trig_bit_pfmet130_pfmht130, "HLT_PFMET130_PFMHT130_IDTight_v/B");
+    //tree -> Branch("HLT_PFMET140_PFMHT140_IDTight_v", &trig_bit_pfmet140_pfmht140, "HLT_PFMET140_PFMHT140_IDTight_v/B");
+    //tree -> Branch("HLT_PFMETTypeOne110_PFMHT110_IDTight_v", &trig_bit_pfmetTypeOne110_pfmht110, "HLT_PFMETTypeOne110_PFMHT110_IDTight_v/B");
+    //tree -> Branch("HLT_PFMETTypeOne120_PFMHT120_IDTight_v", &trig_bit_pfmetTypeOne120_pfmht120, "HLT_PFMETTypeOne120_PFMHT120_IDTight_v/B");
+    //tree -> Branch("HLT_PFMETTypeOne120_PFMHT120_IDTight_PFHT60_v", &trig_bit_pfmetTypeOne120_pfmht120_PFHT60, "HLT_PFMETTypeOne120_PFMHT120_IDTight_PFHT60_v/B");
+    //tree -> Branch("HLT_PFMETTypeOne130_PFMHT130_IDTight_v", &trig_bit_pfmetTypeOne130_pfmht130, "HLT_PFMETTypeOne130_PFMHT130_IDTight_v/B");
+    //tree -> Branch("HLT_PFMETTypeOne140_PFMHT140_IDTight_v", &trig_bit_pfmetTypeOne140_pfmht140, "HLT_PFMETTypeOne140_PFMHT140_IDTight_v/B");
+    //tree -> Branch("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v", &trig_bit_pfmetnomu110_pfmhtnomu110, "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v/B");
+    //tree -> Branch("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v", &trig_bit_pfmetnomu120_pfmhtnomu120, "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v/B");
+    //tree -> Branch("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_v", &trig_bit_pfmetnomu120_pfmhtnomu120_PFHT60, "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_v/B");
+    //tree -> Branch("HLT_PFMETNoMu130_PFMHTNoMu130_IDTight_v", &trig_bit_pfmetnomu130_pfmhtnomu130, "HLT_PFMETNoMu130_PFMHTNoMu130_IDTight_v/B");
+    //tree -> Branch("HLT_PFMETNoMu140_PFMHTNoMu140_IDTight_v", &trig_bit_pfmetnomu140_pfmhtnomu140, "HLT_PFMETNoMu140_PFMHTNoMu140_IDTight_v/B");
+    //tree -> Branch("HLT_Ele27_WPTight_Gsf_v", &trig_bit_ele27_wptight_gsf, "HLT_Ele27_WPTight_Gsf_v/B");
+    //tree -> Branch("HLT_IsoMu24_v", &trig_bit_isomu24, "HLT_IsoMu24_v/B");
     tree -> Branch("Flag_HBHENoiseFilter", &trig_bit_flag_HBHENoiseFilter, "Flag_HBHENoiseFilter/B");
     tree -> Branch("Flag_HBHENoiseIsoFilter", &trig_bit_flag_HBHENoiseIsoFilter, "Flag_HBHENoiseIsoFilter/B");
     tree -> Branch("Flag_EcalDeadCellTriggerPrimitiveFilter", &trig_bit_flag_EcalDeadCellTriggerPrimitiveFilter, "Flag_EcalDeadCellTriggerPrimitiveFilter/B");
@@ -277,6 +330,49 @@ RecoStudies::RecoStudies(const edm::ParameterSet& iConfig):
     tree -> Branch("Flag_BadChCand", &flag_BadChCand, "Flag_BadChCand/B");
     tree -> Branch("Flag_BadPFMuon", &flag_BadPFMuon, "Flag_BadPFMuon/B");
 
+    //Histograms
+    Matching_to_b_AK4Jets = fs->make<TH1F>("Matching_to_b_AK4Jets", "Matching_to_b_AK4Jets", 10,0,10);
+    Matching_to_b_CHSAK4Jets = fs->make<TH1F>("Matching_to_b_CHSAK4Jets", "Matching_to_b_CHSAK4Jets", 10,0,10);
+    Matching_to_b_AK4Jets_simplified = fs->make<TH1F>("Matching_to_b_AK4Jets_simplified", "Matching_to_b_AK4Jets_simplified", 4,0,4);
+    Matching_to_b_CHSAK4Jets_simplified = fs->make<TH1F>("Matching_to_b_CHSAK4Jets_simplified", "Matching_to_b_CHSAK4Jets_simplified", 4,0,4);
+    Matching_to_pi_AK4Jets = fs->make<TH1F>("Matching_to_pi_AK4Jets", "Matching_to_pi_AK4Jets", 10,0,10);
+    Matching_to_pi_CHSAK4Jets = fs->make<TH1F>("Matching_to_pi_CHSAK4Jets", "Matching_to_pi_CHSAK4Jets", 10,0,10);
+
+    CSV_AK4Jets_matched_to_0b = fs->make<TH1F>("CSV_AK4Jets_matched_to_0b", "CSV_AK4Jets_matched_to_0b", 50,0,1);
+    CSV_CHSAK4Jets_matched_to_0b = fs->make<TH1F>("CSV_CHSAK4Jets_matched_to_0b", "CSV_CHSAK4Jets_matched_to_0b", 50,0,1);
+    CSV_AK4Jets_matched_to_1b = fs->make<TH1F>("CSV_AK4Jets_matched_to_1b", "CSV_AK4Jets_matched_to_1b", 50,0,1);
+    CSV_CHSAK4Jets_matched_to_1b = fs->make<TH1F>("CSV_CHSAK4Jets_matched_to_1b", "CSV_CHSAK4Jets_matched_to_1b", 50,0,1);
+    CSV_AK4Jets_matched_to_2b = fs->make<TH1F>("CSV_AK4Jets_matched_to_2b", "CSV_AK4Jets_matched_to_2b", 50,0,1);
+    CSV_CHSAK4Jets_matched_to_2b = fs->make<TH1F>("CSV_CHSAK4Jets_matched_to_2b", "CSV_CHSAK4Jets_matched_to_2b", 50,0,1);
+    CSV_AK4Jets_matched_to_more_2b = fs->make<TH1F>("CSV_AK4Jets_matched_to_more_2b", "CSV_AK4Jets_matched_to_more_2b", 50,0,1);
+    CSV_CHSAK4Jets_matched_to_more_2b = fs->make<TH1F>("CSV_CHSAK4Jets_matched_to_more_2b", "CSV_CHSAK4Jets_matched_to_more_2b", 50,0,1);
+
+    CSV_AK4Jets_matched_to_0pi = fs->make<TH1F>("CSV_AK4Jets_matched_to_0pi", "CSV_AK4Jets_matched_to_0pi", 50,0,1);
+    CSV_CHSAK4Jets_matched_to_0pi = fs->make<TH1F>("CSV_CHSAK4Jets_matched_to_0pi", "CSV_CHSAK4Jets_matched_to_0pi", 50,0,1);
+    CSV_AK4Jets_matched_to_1pi = fs->make<TH1F>("CSV_AK4Jets_matched_to_1pi", "CSV_AK4Jets_matched_to_1pi", 50,0,1);
+    CSV_CHSAK4Jets_matched_to_1pi = fs->make<TH1F>("CSV_CHSAK4Jets_matched_to_1pi", "CSV_CHSAK4Jets_matched_to_1pi", 50,0,1);
+    CSV_AK4Jets_matched_to_2pi = fs->make<TH1F>("CSV_AK4Jets_matched_to_2pi", "CSV_AK4Jets_matched_to_2pi", 50,0,1);
+    CSV_CHSAK4Jets_matched_to_2pi = fs->make<TH1F>("CSV_CHSAK4Jets_matched_to_2pi", "CSV_CHSAK4Jets_matched_to_2pi", 50,0,1);
+
+    pT_AK4Jets_matched_to_0b = fs->make<TH1F>("pT_AK4Jets_matched_to_0b", "pT_AK4Jets_matched_to_0b", 100,0,1000);
+    pT_CHSAK4Jets_matched_to_0b = fs->make<TH1F>("pT_CHSAK4Jets_matched_to_0b", "pT_CHSAK4Jets_matched_to_0b", 100,0,1000);
+    pT_AK4Jets_matched_to_1b = fs->make<TH1F>("pT_AK4Jets_matched_to_1b", "pT_AK4Jets_matched_to_1b", 100,0,1000);
+    pT_CHSAK4Jets_matched_to_1b = fs->make<TH1F>("pT_CHSAK4Jets_matched_to_1b", "pT_CHSAK4Jets_matched_to_1b", 100,0,1000);
+    pT_AK4Jets_matched_to_2b = fs->make<TH1F>("pT_AK4Jets_matched_to_2b", "pT_AK4Jets_matched_to_2b", 100,0,1000);
+    pT_CHSAK4Jets_matched_to_2b = fs->make<TH1F>("pT_CHSAK4Jets_matched_to_2b", "pT_CHSAK4Jets_matched_to_2b", 100,0,1000);
+    pT_AK4Jets_matched_to_more_2b = fs->make<TH1F>("pT_AK4Jets_matched_to_more_2b", "pT_AK4Jets_matched_to_more_2b", 100,0,1000);
+    pT_CHSAK4Jets_matched_to_more_2b = fs->make<TH1F>("pT_CHSAK4Jets_matched_to_more_2b", "pT_CHSAK4Jets_matched_to_more_2b", 100,0,1000);
+
+    pT_AK4Jets_matched_to_0pi = fs->make<TH1F>("pT_AK4Jets_matched_to_0pi", "pT_AK4Jets_matched_to_0pi", 100,0,1000);
+    pT_CHSAK4Jets_matched_to_0pi = fs->make<TH1F>("pT_CHSAK4Jets_matched_to_0pi", "pT_CHSAK4Jets_matched_to_0pi", 100,0,1000);
+    pT_AK4Jets_matched_to_1pi = fs->make<TH1F>("pT_AK4Jets_matched_to_1pi", "pT_AK4Jets_matched_to_1pi", 100,0,1000);
+    pT_CHSAK4Jets_matched_to_1pi = fs->make<TH1F>("pT_CHSAK4Jets_matched_to_1pi", "pT_CHSAK4Jets_matched_to_1pi", 100,0,1000);
+    pT_AK4Jets_matched_to_2pi = fs->make<TH1F>("pT_AK4Jets_matched_to_2pi", "pT_AK4Jets_matched_to_2pi", 100,0,1000);
+    pT_CHSAK4Jets_matched_to_2pi = fs->make<TH1F>("pT_CHSAK4Jets_matched_to_2pi", "pT_CHSAK4Jets_matched_to_2pi", 100,0,1000);
+    
+
+    if(isVerbose) std::cout << "---------- STARTING ----------" << std::endl;
+
 }
 
 
@@ -285,6 +381,8 @@ RecoStudies::~RecoStudies()
  
    // do anything here that needs to be done at desctruction time
    // (e.g. close files, deallocate resources etc.)
+    if(isVerbose) std::cout << "---------- ENDING  ----------" << std::endl;
+
     delete theCHSJetAnalyzer;
     delete theJetAnalyzer;
     delete theGenAnalyzer;
@@ -310,25 +408,26 @@ RecoStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     isMC = false;
     EventNumber = LumiNumber = RunNumber = nPV = 0;
-    nTightMuons = nTightElectrons = nTightFatJets = nLooseMuons = nLooseElectrons = nLooseFatJets = 0;
+    nJets = nLooseJets = nTightJets = nCHSJets = nLooseCHSJets = nTightCHSJets = nGenBquarks = nGenLL = 0;
+    //nTightMuons = nTightElectrons = nTightFatJets = nLooseMuons = nLooseElectrons = nLooseFatJets = 0;
 
-    trig_bit_pfmet110_pfmht110 = false;
-    trig_bit_pfmet120_pfmht120 = false;
-    trig_bit_pfmet120_pfmht120_PFHT60 = false;
-    trig_bit_pfmet130_pfmht130 = false;
-    trig_bit_pfmet140_pfmht140 = false;
-    trig_bit_pfmetTypeOne110_pfmht110 = false;
-    trig_bit_pfmetTypeOne120_pfmht120 = false;
-    trig_bit_pfmetTypeOne120_pfmht120_PFHT60 = false;
-    trig_bit_pfmetTypeOne130_pfmht130 = false;
-    trig_bit_pfmetTypeOne140_pfmht140 = false;
-    trig_bit_pfmetnomu110_pfmhtnomu110 = false;
-    trig_bit_pfmetnomu120_pfmhtnomu120 = false;
-    trig_bit_pfmetnomu120_pfmhtnomu120_PFHT60 = false;
-    trig_bit_pfmetnomu130_pfmhtnomu130 = false;
-    trig_bit_pfmetnomu140_pfmhtnomu140 = false;
-    trig_bit_ele27_wptight_gsf = false;
-    trig_bit_isomu24 = false;
+    //trig_bit_pfmet110_pfmht110 = false;
+    //trig_bit_pfmet120_pfmht120 = false;
+    //trig_bit_pfmet120_pfmht120_PFHT60 = false;
+    //trig_bit_pfmet130_pfmht130 = false;
+    //trig_bit_pfmet140_pfmht140 = false;
+    //trig_bit_pfmetTypeOne110_pfmht110 = false;
+    //trig_bit_pfmetTypeOne120_pfmht120 = false;
+    //trig_bit_pfmetTypeOne120_pfmht120_PFHT60 = false;
+    //trig_bit_pfmetTypeOne130_pfmht130 = false;
+    //trig_bit_pfmetTypeOne140_pfmht140 = false;
+    //trig_bit_pfmetnomu110_pfmhtnomu110 = false;
+    //trig_bit_pfmetnomu120_pfmhtnomu120 = false;
+    //trig_bit_pfmetnomu120_pfmhtnomu120_PFHT60 = false;
+    //trig_bit_pfmetnomu130_pfmhtnomu130 = false;
+    //trig_bit_pfmetnomu140_pfmhtnomu140 = false;
+    //trig_bit_ele27_wptight_gsf = false;
+    //trig_bit_isomu24 = false;
     //trig_bit_flag_HBHENoiseFilter = false;
     //trig_bit_flag_HBHENoiseIsoFilter = false;
     //trig_bit_flag_EcalDeadCellTriggerPrimitiveFilter = false;
@@ -336,15 +435,16 @@ RecoStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     //trig_bit_flag_eeBadScFilter = false;
     //trig_bit_flag_globalSuperTightHalo2016Filter = false;
 
-    muon1_pt = 0.;
-    muon1_pfIso04 = -1.;
-    electron1_pt = 0.;
-    muon1_isLoose = muon1_isTight = fatjet1_isLoose = fatjet1_isTight = false;
-    met_pt = met_pt_nomu_L = met_pt_nomu_T = m_ht = m_ht_nomu_L = m_ht_nomu_T = min_met_mht = min_met_mht_nomu_L = min_met_mht_nomu_T = 0.;
-    met_phi = met_phi_nomu_L = met_phi_nomu_T = -10.;
+    //muon1_pt = 0.;
+    //muon1_pfIso04 = -1.;
+    //electron1_pt = 0.;
+    //muon1_isLoose = muon1_isTight = fatjet1_isLoose = fatjet1_isTight = false;
+    //met_pt = met_pt_nomu_L = met_pt_nomu_T = m_ht = m_ht_nomu_L = m_ht_nomu_T = min_met_mht = min_met_mht_nomu_L = min_met_mht_nomu_T = 0.;
+    //met_phi = met_phi_nomu_L = met_phi_nomu_T = -10.;
 
 
     //Accessing trigger bits (same as AOD); thanks to Owen Long (SUSY)
+    /*
     edm::Handle<edm::TriggerResults> trigResults;
     iEvent.getByToken(trigResultsToken, trigResults);
 
@@ -368,10 +468,10 @@ RecoStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
               if ( TrigPath.Contains("HLT_PFMETTypeOne130_PFMHT130_IDTight_v") ) trig_bit_pfmetTypeOne130_pfmht130 = true;
               if ( TrigPath.Contains("HLT_PFMETTypeOne140_PFMHT140_IDTight_v") ) trig_bit_pfmetTypeOne140_pfmht140 = true;
 
-              if ( TrigPath.Contains("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v") ) {
-		  trig_bit_pfmetnomu110_pfmhtnomu110 = true;
-		  std::cout << TrigPath << std::endl;
-	      }
+              //if ( TrigPath.Contains("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v") ) {
+	          //trig_bit_pfmetnomu110_pfmhtnomu110 = true;
+		  //std::cout << TrigPath << std::endl;
+	      //}
               if ( TrigPath.Contains("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v") ) trig_bit_pfmetnomu120_pfmhtnomu120 = true;
               if ( TrigPath.Contains("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_v") ) trig_bit_pfmetnomu120_pfmhtnomu120_PFHT60 = true;
               if ( TrigPath.Contains("HLT_PFMETNoMu130_PFMHTNoMu130_IDTight_v") ) trig_bit_pfmetnomu130_pfmhtnomu130 = true;
@@ -382,7 +482,7 @@ RecoStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
            }
         }
     }
-
+    */
 
     
     //MET filters
@@ -424,23 +524,184 @@ RecoStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     RunNumber = iEvent.id().run();
 
     //Initialize met no mu
-    float met_pt_nomu_x_L(0.), met_pt_nomu_y_L(0.), met_pt_nomu_x_T(0.), met_pt_nomu_y_T(0.);
+    //float met_pt_nomu_x_L(0.), met_pt_nomu_y_L(0.), met_pt_nomu_x_T(0.), met_pt_nomu_y_T(0.);
 
+
+    // Gen particles
+    std::vector<reco::GenParticle> GenLongLivedVect = theGenAnalyzer->FillGenVectorByIdAndStatus(iEvent,9000006,22);
+    nGenLL = GenLongLivedVect.size();
+    std::vector<reco::GenParticle> GenBquarksVect;
+    if(nGenLL>0)
+      {
+	GenBquarksVect = theGenAnalyzer->FillGenVectorByIdStatusAndMother(iEvent,5,23,9000006);
+      }
+    else
+      {
+	GenBquarksVect = theGenAnalyzer->FillGenVectorByIdAndStatus(iEvent,5,23);
+      }
+    //std::vector<reco::GenParticle> GenBquarksVect = theGenAnalyzer->FillGenVectorByIdAndStatus(iEvent,5,23);
+    nGenBquarks = GenBquarksVect.size();
+    //std::vector<reco::GenParticle> GenBquarksFromLLVect = theGenAnalyzer->FillGenVectorByIdStatusAndMother(iEvent,5,23,9000006);
+
+    //right now: if LL, remove quarks not coming from LL particle
+    /*
+    if(nGenBquarks>4 && nGenLL>0) {
+          std::cout << "more than 4 b quarks: " << nGenBquarks << std::endl;
+	  for(unsigned int q = 0; q<GenBquarksVect.size(); q++) {
+	      std::cout << "quark n. " << q << std::endl;
+	      std::cout << "mother id: " << GenBquarksVect[q].mother()->pdgId() << std::endl;
+	      std::cout << "quark pt: " << GenBquarksVect[q].pt() << std::endl;
+	      //std::cout << "is last copy? " << GenBquarksVect[q].isLastCopy() << std::endl;
+	      //if( fabs(GenBquarksVect[q].mother()->pdgId())!= 9000006 ) GenBquarksVect.erase(GenBquarksVect.begin() + q);
+	    }
+
+	  //for(unsigned int w = 0; w<GenBquarksFromLLVect.size(); w++) {
+	  //std::cout << "BBB quark n. " << w << std::endl;
+	  //std::cout << "BBB quark pt: " << GenBquarksFromLLVect[w].pt() << std::endl;
+	  //}
+    }
+    */
+    //nGenBquarks = GenBquarksVect.size();
+    //std::cout << "nGenB quark " << nGenBquarks << std::endl;
+    //std::cout << "nGenB quark from LL only " << GenBquarksFromLLVect.size() << std::endl;
 
     // Jets
     std::vector<pat::Jet> CHSJetsVect = theCHSJetAnalyzer->FillJetVector(iEvent);
     std::vector<pat::Jet> JetsVect = theJetAnalyzer->FillJetVector(iEvent);
     nJets = JetsVect.size();
+    nCHSJets = CHSJetsVect.size();
+
+    for(unsigned int a = 0; a<JetsVect.size(); a++) {
+        if(JetsVect[a].hasUserInt("isLoose") && JetsVect[a].userInt("isLoose")>0) nLooseJets++;
+        if(JetsVect[a].hasUserInt("isTight") && JetsVect[a].userInt("isTight")>0) nTightJets++;
+
+	//Matching to b quarks of AK4Jets
+	int n_b_matched = 0;
+	for(unsigned int b = 0; b<GenBquarksVect.size(); b++) {
+  	    if(fabs(reco::deltaR(JetsVect[a].eta(),JetsVect[a].phi(),GenBquarksVect[b].eta(),GenBquarksVect[b].phi()))<0.4) n_b_matched++;
+	}
+	JetsVect[a].addUserInt("hasMatchedBquarks",n_b_matched);
+	Matching_to_b_AK4Jets->Fill(n_b_matched);
+
+	if(n_b_matched==0)
+	  {
+	    Matching_to_b_AK4Jets_simplified->Fill(0);
+	    CSV_AK4Jets_matched_to_0b->Fill(JetsVect[a].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+	    pT_AK4Jets_matched_to_0b->Fill(JetsVect[a].pt());
+	  }
+	else if(n_b_matched==1)
+	  {
+	    Matching_to_b_AK4Jets_simplified->Fill(1);
+	    CSV_AK4Jets_matched_to_1b->Fill(JetsVect[a].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+	    pT_AK4Jets_matched_to_1b->Fill(JetsVect[a].pt());
+	  }
+	else if(n_b_matched==2)
+	  {
+	    Matching_to_b_AK4Jets_simplified->Fill(2);
+	    CSV_AK4Jets_matched_to_2b->Fill(JetsVect[a].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+	    pT_AK4Jets_matched_to_2b->Fill(JetsVect[a].pt());
+	  }
+	else
+	  {
+	    Matching_to_b_AK4Jets_simplified->Fill(3);
+	    CSV_AK4Jets_matched_to_more_2b->Fill(JetsVect[a].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+	    pT_AK4Jets_matched_to_more_2b->Fill(JetsVect[a].pt());
+	  }
+	//std::cout<<"jet n. " << a << " has " << n_b_matched << " matched b quarks" << std::endl;
 
 
-    // Gen particles
-    std::vector<reco::GenParticle> GenBquarkVect = theGenAnalyzer->FillGenVectorByIdAndStatus(iEvent,5,23);
-    std::vector<reco::GenParticle> GenLongLivedVect = theGenAnalyzer->FillGenVectorByIdAndStatus(iEvent,9000006,22);
+	//Matching to dark pions of AK4Jets
+	int n_pi_matched = 0;
+	for(unsigned int pi = 0; pi<GenLongLivedVect.size(); pi++) {
+  	    if(fabs(reco::deltaR(JetsVect[a].eta(),JetsVect[a].phi(),GenLongLivedVect[pi].eta(),GenLongLivedVect[pi].phi()))<0.4) n_pi_matched++;
+	}
+	JetsVect[a].addUserInt("hasMatchedLL",n_pi_matched);
+	Matching_to_pi_AK4Jets->Fill(n_pi_matched);
 
-    // GenBquarkVect
-    theJetAnalyzer->GenMatcher(JetsVect, GenBquarkVect, "q");
-    theCHSJetAnalyzer->GenMatcher(CHSJetsVect, GenBquarkVect, "q");
-    //theCHSJetAnalyzer->GenMatcher(FatJetsVect, GenBquarkVect, "q");
+	if(n_pi_matched==0)
+	  {
+	    CSV_AK4Jets_matched_to_0pi->Fill(JetsVect[a].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+	    pT_AK4Jets_matched_to_0pi->Fill(JetsVect[a].pt());
+	  }
+	else if(n_pi_matched==1)
+	  {
+	    CSV_AK4Jets_matched_to_1pi->Fill(JetsVect[a].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+	    pT_AK4Jets_matched_to_1pi->Fill(JetsVect[a].pt());
+	  }
+	else if(n_pi_matched==2)
+	  {
+	    CSV_AK4Jets_matched_to_2pi->Fill(JetsVect[a].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+	    pT_AK4Jets_matched_to_2pi->Fill(JetsVect[a].pt());
+	  }
+
+    }
+
+    for(unsigned int a = 0; a<CHSJetsVect.size(); a++) {
+        if(CHSJetsVect[a].hasUserInt("isLoose") && CHSJetsVect[a].userInt("isLoose")>0) nLooseCHSJets++;
+        if(CHSJetsVect[a].hasUserInt("isTight") && CHSJetsVect[a].userInt("isTight")>0) nTightCHSJets++;
+
+	//Matching to b quarks of CHSAK4Jets
+	int n_b_matched_chs = 0;
+	for(unsigned int b = 0; b<GenBquarksVect.size(); b++) {
+  	    if(fabs(reco::deltaR(CHSJetsVect[a].eta(),CHSJetsVect[a].phi(),GenBquarksVect[b].eta(),GenBquarksVect[b].phi()))<0.4) n_b_matched_chs++;
+	}
+	CHSJetsVect[a].addUserInt("hasMatchedBquarks",n_b_matched_chs);
+	Matching_to_b_CHSAK4Jets->Fill(n_b_matched_chs);
+	if(n_b_matched_chs==0)
+	  {
+	    Matching_to_b_CHSAK4Jets_simplified->Fill(0);
+	    CSV_CHSAK4Jets_matched_to_0b->Fill(CHSJetsVect[a].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+	    pT_CHSAK4Jets_matched_to_0b->Fill(CHSJetsVect[a].pt());
+	  }
+	else if(n_b_matched_chs==1)
+	  {
+	    Matching_to_b_CHSAK4Jets_simplified->Fill(1);
+	    CSV_CHSAK4Jets_matched_to_1b->Fill(CHSJetsVect[a].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+	    pT_CHSAK4Jets_matched_to_1b->Fill(CHSJetsVect[a].pt());
+	  }
+	else if(n_b_matched_chs==2)
+	  {
+	    Matching_to_b_CHSAK4Jets_simplified->Fill(2);
+	    CSV_CHSAK4Jets_matched_to_2b->Fill(CHSJetsVect[a].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+	    pT_CHSAK4Jets_matched_to_2b->Fill(CHSJetsVect[a].pt());
+	  }
+	else
+	  {
+	    Matching_to_b_CHSAK4Jets_simplified->Fill(3);
+	    CSV_CHSAK4Jets_matched_to_more_2b->Fill(CHSJetsVect[a].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+	    pT_CHSAK4Jets_matched_to_more_2b->Fill(CHSJetsVect[a].pt());
+	  }
+
+	//Matching to dark pions of CHSAK4Jets
+	int n_pi_matched_chs = 0;
+	for(unsigned int pi = 0; pi<GenLongLivedVect.size(); pi++) {
+  	    if(fabs(reco::deltaR(CHSJetsVect[a].eta(),CHSJetsVect[a].phi(),GenLongLivedVect[pi].eta(),GenLongLivedVect[pi].phi()))<0.4) n_pi_matched_chs++;
+	}
+	CHSJetsVect[a].addUserInt("hasMatchedLL",n_pi_matched_chs);
+	Matching_to_pi_CHSAK4Jets->Fill(n_pi_matched_chs);
+	if(n_pi_matched_chs==0)
+	  {
+	    CSV_CHSAK4Jets_matched_to_0pi->Fill(CHSJetsVect[a].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+	    pT_CHSAK4Jets_matched_to_0pi->Fill(CHSJetsVect[a].pt());
+	  }
+	else if(n_pi_matched_chs==1)
+	  {
+	    CSV_CHSAK4Jets_matched_to_1pi->Fill(CHSJetsVect[a].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+	    pT_CHSAK4Jets_matched_to_1pi->Fill(CHSJetsVect[a].pt());
+	  }
+	else if(n_pi_matched_chs==2)
+	  {
+	    CSV_CHSAK4Jets_matched_to_2pi->Fill(CHSJetsVect[a].bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+	    pT_CHSAK4Jets_matched_to_2pi->Fill(CHSJetsVect[a].pt());
+	  }
+
+	//std::cout<<"jet n. " << a << " has " << n_b_matched << " matched b quarks" << std::endl;
+    }
+
+    // GenBquarksVect
+    theJetAnalyzer->GenMatcher(JetsVect, GenBquarksVect, "q");
+    theCHSJetAnalyzer->GenMatcher(CHSJetsVect, GenBquarksVect, "q");
+    //theCHSJetAnalyzer->GenMatcher(FatJetsVect, GenBquarksVect, "q");
     //GenLongLivedVect
     theJetAnalyzer->GenMatcher(JetsVect, GenLongLivedVect, "pi");
     theCHSJetAnalyzer->GenMatcher(CHSJetsVect, GenLongLivedVect, "pi");
@@ -459,178 +720,36 @@ RecoStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     */
 
 
-    /*
-    //Loop on MET
-    edm::Handle<pat::METCollection> MetColl;
-    iEvent.getByToken( metToken, MetColl);
-    pat::MET met = MetColl->front();
-    met_pt = met.pt();
-    met_phi = met.phi();
-    met_pt_nomu_x_L = met_pt_nomu_x_T = met.px();//before summing up muons
-    met_pt_nomu_y_L = met_pt_nomu_y_T = met.py();//before summing up muons
-
-    //Loop on AK8 jets
-    edm::Handle<pat::JetCollection> fatjets;
-    iEvent.getByToken( fatjetToken, fatjets );
-    //std::vector<pat::Jet> FatJetVect;
-
-    for(std::vector<pat::Jet>::const_iterator it=fatjets->begin(); it!=fatjets->end(); it++) {
-        pat::Jet f=*it;
-	if ( !isLooseJet(f) ) continue;
-	fatjet1_isLoose = true;
-        if ( f.pt() < 170 ) continue;
-        if ( fabs( f.eta() ) > 2.5 ) continue;
-	nLooseFatJets++;
-	fatjet1_pt = f.pt();
-	if ( !isTightJet(f) ) continue;
-	fatjet1_isTight = true;
-	nTightFatJets++;
-	//FatJetVect.push_back(f);
+    if(isVerbose) {
+      std::cout << " --- Event n. " << iEvent.id().event() << ", lumi " << iEvent.luminosityBlock() << ", run " << iEvent.id().run() << std::endl;
+      //std::cout << "number of electrons: " << ElecVect.size() << std::endl;
+      //for(unsigned int i = 0; i < ElecVect.size(); i++) std::cout << "  electron [" << i << "]\tpt: " << ElecVect[i].pt() << "\teta: " << ElecVect[i].eta() << "\tphi: " << ElecVect[i].phi() << "\tmass: " << ElecVect[i].mass() << "\tcharge: " << ElecVect[i].charge() << std::endl;
+      //std::cout << "number of muons:     " << MuonVect.size() << std::endl;
+      //for(unsigned int i = 0; i < MuonVect.size(); i++) std::cout << "  muon     [" << i << "]\tpt: " << MuonVect[i].pt() << "\teta: " << MuonVect[i].eta() << "\tphi: " << MuonVect[i].phi() << "\tmass: " << MuonVect[i].mass() << "\tcharge: " << MuonVect[i].charge() << std::endl;
+      //std::cout << "number of taus:  " << TauVect.size() << std::endl;
+      //for(unsigned int i = 0; i < TauVect.size(); i++) std::cout << "  tau  [" << i << "]\tpt: " << TauVect[i].pt() << "\teta: " << TauVect[i].eta() << "\tphi: " << TauVect[i].phi() << std::endl;
+      //std::cout << "number of photons:  " << PhotonVect.size() << std::endl;
+      //for(unsigned int i = 0; i < PhotonVect.size(); i++) std::cout << "  photon  [" << i << "]\tpt: " << PhotonVect[i].pt() << "\teta: " << PhotonVect[i].eta() << "\tphi: " << PhotonVect[i].phi() << std::endl;
+      //std::cout << "number of CHS AK4 jets:  " << CHSJetsVect.size() << std::endl;
+      //for(unsigned int i = 0; i < CHSJetsVect.size(); i++) std::cout << "  CHS AK4 jet  [" << i << "]\tpt: " << CHSJetsVect[i].pt() << "\teta: " << CHSJetsVect[i].eta() << "\tphi: " << CHSJetsVect[i].phi() << "\tmass: " << CHSJetsVect[i].mass() << std::endl;
+      //std::cout << "number of AK4 jets:  " << JetsVect.size() << std::endl;
+      //for(unsigned int i = 0; i < JetsVect.size(); i++) std::cout << "  AK4 jet  [" << i << "]\tpt: " << JetsVect[i].pt() << "\teta: " << JetsVect[i].eta() << "\tphi: " << JetsVect[i].phi() << "\tmass: " << JetsVect[i].mass() << std::endl;
+      //std::cout << "number of Gen B quarks:  " << GenBquarksVect.size() << std::endl;
+      //for(unsigned int i = 0; i < GenBquarksVect.size(); i++) std::cout << "  Gen B quark  [" << i << "]\tpt: " << GenBquarksVect[i].pt() << "\teta: " << GenBquarksVect[i].eta() << "\tphi: " << GenBquarksVect[i].phi() << "\tmass: " << GenBquarksVect[i].mass() << std::endl;
+      //std::cout << "number of AK8 jets:  " << FatJetsVect.size() << std::endl;
+      //for(unsigned int i = 0; i < FatJetsVect.size(); i++) std::cout << "  AK8 jet  [" << i << "]\tpt: " << FatJetsVect[i].pt() << "\teta: " << FatJetsVect[i].eta() << "\tphi: " << FatJetsVect[i].phi() << "\tmass: " << FatJetsVect[i].mass() << std::endl;
+      //std::cout << "Missing energy:      " << MET.pt() << std::endl;
+      //std::cout << "V leptonic mass:     " << theV.mass() << std::endl;
     }
-    */
-
-
-    /*
-    //Loop on AK4 jets
-    edm::Handle<pat::JetCollection> jets;
-    iEvent.getByToken( jetToken, jets );
-    //new way
-    //edm::Handle<std::vector<pat::Jet> > PFJetsCollection;
-    //iEvent.getByToken( CHSJetToken, jets );
-    std::vector<pat::Jet> JetVect;
-
-    for(std::vector<pat::Jet>::const_iterator it=jets->begin(); it!=jets->end(); it++) {
-        pat::Jet j=*it;
-	if ( !isLooseJet(j) ) continue;
-        if ( j.pt() < 30 ) continue;//this causes a jump at ~30? investigate!
-        if ( fabs( j.eta() ) > 2.5 ) continue;
-        nLooseJets++;
-	jet1_pt = j.pt();
-	JetVect.push_back(j);
-    }
-    
-    float m_ht_x(0.), m_ht_y(0.), m_ht_nomu_x_L(0.), m_ht_nomu_y_L(0.), m_ht_nomu_x_T(0.), m_ht_nomu_y_T(0.);
-    
-    for(unsigned int a=0; a<JetVect.size(); a++){
-        m_ht_x -= JetVect.at(a).px();
-        m_ht_y -= JetVect.at(a).py();
-        m_ht_nomu_x_L -= JetVect.at(a).px();
-        m_ht_nomu_y_L -= JetVect.at(a).py();
-        m_ht_nomu_x_T -= JetVect.at(a).px();
-        m_ht_nomu_y_T -= JetVect.at(a).py();
-    }
-    
-    m_ht = sqrt( pow(m_ht_x,2) + pow(m_ht_y,2)  );
-    min_met_mht = std::min(met_pt,m_ht);
-
-    //Loop on muons ---> fix
-    edm::Handle<pat::MuonCollection> muons;
-    iEvent.getByToken( muonToken, muons );
-    //std::vector<pat::Muon> MuonVect;
-
-
-    //for ( const pat::Muon &m : *muons) {
-    for(std::vector<pat::Muon>::const_iterator it=muons->begin(); it!=muons->end(); it++) {
-        pat::Muon m=*it;
-        //if ( m.pt() < 30 ) continue; //this causes a jump at ~30 GeV, investigate
-        if ( fabs( m.eta() ) > 2.4 ) continue; //this selection is necessary
-	if (!m.isLooseMuon()) continue;
-        muon1_isLoose = true;
-	float pfIso04 = (m.pfIsolationR04().sumChargedHadronPt + std::max(m.pfIsolationR04().sumNeutralHadronEt + m.pfIsolationR04().sumPhotonEt - 0.5*m.pfIsolationR04().sumPUPt, 0.) ) / m.pt();
-        //if (pfIso04>0.25) continue; //at least loose isolation: try to drop
-        met_pt_nomu_x_L += m.px();
-        met_pt_nomu_y_L += m.py();
-	m_ht_nomu_x_L += m.px();
-	m_ht_nomu_y_L += m.py();
-	nLooseMuons++;
-        //muon1_isLoose = true;
-	if (!m.isTightMuon(*vertex)) continue;
-        muon1_isTight = true;
-        met_pt_nomu_x_T += m.px();
-        met_pt_nomu_y_T += m.py();
-	m_ht_nomu_x_T += m.px();
-	m_ht_nomu_y_T += m.py();
-	nTightMuons++;
-        //muon1_isTight = true;
- 	muon1_pt = m.pt();
-        muon1_pfIso04 = pfIso04;
-	//MuonVect.push_back(m);
-    } // loop over muons, saving only tight muons
-
-    met_pt_nomu_L = sqrt( pow(met_pt_nomu_x_L,2) + pow(met_pt_nomu_y_L,2) );
-    met_pt_nomu_T = sqrt( pow(met_pt_nomu_x_T,2) + pow(met_pt_nomu_y_T,2) );
-    m_ht_nomu_L = sqrt( pow(m_ht_nomu_x_L,2) + pow(m_ht_nomu_y_L,2)  );
-    m_ht_nomu_T = sqrt( pow(m_ht_nomu_x_T,2) + pow(m_ht_nomu_y_T,2)  );
-    min_met_mht_nomu_L = std::min(met_pt_nomu_L,m_ht_nomu_L);
-    min_met_mht_nomu_T = std::min(met_pt_nomu_T,m_ht_nomu_T);
-
-
-    //Loop on electrons ---> fix, missing Electron IDs
-    
-    ////edm::InputTag convLabel = edm::InputTag("reducedEgamma:reducedConversions");
-    ////edm::Handle<reco::ConversionCollection> conversions;
-    ////iEvent.getByLabel( convLabel, conversions );
-
-    //edm::InputTag bsLabel = edm::InputTag("offlineBeamSpot");
-    //edm::Handle<reco::BeamSpot> bsHandle;
-    //iEvent.getByLabel( bsLabel, bsHandle );
-    //const reco::BeamSpot &beamspot = *bsHandle.product();
-
-    edm::Handle<pat::ElectronCollection> electrons;
-    iEvent.getByToken( electronToken, electrons );
-    //std::vector<pat::Electron> ElectronVect;
-    for(std::vector<pat::Electron>::const_iterator it=electrons->begin(); it!=electrons->end(); it++) {
-        pat::Electron e=*it;
-	/*
-	GsfElectron::PflowIsolationVariables pfIso = e.pfIsolationVariables();
-	bool isEB = e.isEB() ? true : false;
-	float dEtaIn = e.deltaEtaSuperClusterTrackAtVtx();
-	float dPhiIn = e.deltaPhiSuperClusterTrackAtVtx();
-	float full5x5 = e.full5x5_sigmaIetaIeta();
-	float hoe = e.hadronicOverEm();
-	float absiso = pfIso.sumChargedHadronPt + max(0.0 , pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - 0.5 * pfIso.sumPUPt );
-	float relIsoWithDBeta_ = absiso/e.pt();
-	float ooEmooP_; 
-	if( e.ecalEnergy() == 0 ){
-	    printf("Electron energy is zero!\n");
-	    ooEmooP_ = 999;
-	}
-        else if( !std::isfinite(e.ecalEnergy())){
-	    printf("Electron energy is not finite!\n");
-	    ooEmooP_ = 998;
-	}
-        else{
-	    ooEmooP_ = fabs(1.0/e.ecalEnergy() - e.eSuperClusterOverP()/e.ecalEnergy() );
-	}
-	std::cout << ooEmooP_ << std::endl;
-	float d0 = (-1) * e.gsfTrack()->dxy(vtxPoint);
-	float dz = e.gsfTrack()->dz(vtxPoint);
-	float missHits = e.gsfTrack()->hitPattern().numberOfLostTrackerHits(HitPattern::MISSING_INNER_HITS);
-	bool hasMatchConv = ConversionTools::hasMatchedConversion(e, conversions, beamspot.position());
-	bool isVeto = passIDWP("VETO",isEB, dEtaIn, dPhiIn, full5x5, hoe, d0, dz, ooEmooP_, hasMatchConv, missHits);
-	bool isLoose = passIDWP("LOOSE",isEB, dEtaIn, dPhiIn, full5x5, hoe, d0, dz, ooEmooP_, hasMatchConv, missHits);
-	bool isMedium = passIDWP("MEDIUM",isEB, dEtaIn, dPhiIn, full5x5, hoe, d0, dz, ooEmooP_, hasMatchConv, missHits);
-	bool isTight = passIDWP("TIGHT",isEB, dEtaIn, dPhiIn, full5x5, hoe, d0, dz, ooEmooP_, hasMatchConv, missHits);
-	// Look up the ID decision for this electron in 	
-	if ( isLoose ) {
-  	    std::cout << "LOOSE ele" << std::endl;
-	}
-    *//*
-        if ( e.pt() < 30 ) continue;
-        if ( fabs( e.eta() ) > 2.5 ) continue;
-	//std::cout << "Electron pt: " << e.pt() << std::endl;
-	electron1_pt = e.pt();
-	//ElectronVect.push_back(e);
-    } // loop over electrons
-    
-
-    */
 
 
     // ---------- Fill objects ----------
+
+    if(isVerbose) std::cout << " - Filling objects" << std::endl;
+
     for(unsigned int i = 0; i < Jets.size() && i < JetsVect.size(); i++) ObjectsFormat::FillJetType(Jets[i], &JetsVect[i], isMC);
     for(unsigned int i = 0; i < CHSJets.size() && i < CHSJetsVect.size(); i++) ObjectsFormat::FillJetType(CHSJets[i], &CHSJetsVect[i], isMC);
-    for(unsigned int i = 0; i < GenBquarks.size() && i < GenBquarkVect.size(); i++) ObjectsFormat::FillGenPType(GenBquarks[i], &GenBquarkVect[i]);
+    for(unsigned int i = 0; i < GenBquarks.size() && i < GenBquarksVect.size(); i++) ObjectsFormat::FillGenPType(GenBquarks[i], &GenBquarksVect[i]);
     for(unsigned int i = 0; i < GenLongLiveds.size() && i < GenLongLivedVect.size(); i++) ObjectsFormat::FillGenPType(GenLongLiveds[i], &GenLongLivedVect[i]);
 
     tree -> Fill();

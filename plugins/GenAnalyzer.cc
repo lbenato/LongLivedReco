@@ -152,6 +152,22 @@ std::vector<reco::GenParticle> GenAnalyzer::FillGenVectorByIdAndStatus(const edm
     return Vect;
 }
 
+std::vector<reco::GenParticle> GenAnalyzer::FillGenVectorByIdStatusAndMother(const edm::Event& iEvent, int partid, int partstatus, int motherid) {
+
+    std::vector<reco::GenParticle> Vect;
+
+    // check if is real data
+    isRealData = iEvent.isRealData();
+    if(isRealData or PythiaLOSample) return Vect;
+    // fill collection for this event 
+    iEvent.getByToken(GenParticlesToken, GenCollection);
+    // Loop on Gen Particles collection
+    for(std::vector<reco::GenParticle>::const_iterator it = GenCollection->begin(); it != GenCollection->end(); ++it) {
+      if(abs(it->pdgId()) == partid && (it->status()) == partstatus && fabs(it->mother()->pdgId()) == motherid) Vect.push_back(*it); // Fill vector
+    }
+    return Vect;
+}
+
 std::map<std::string, float> GenAnalyzer::FillLheMap(const edm::Event& iEvent) {
     std::map<std::string, float> Var;
     if(iEvent.isRealData() or PythiaLOSample) return Var;
