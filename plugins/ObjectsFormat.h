@@ -25,6 +25,7 @@ class ObjectsFormat {
         static void FillTauType(TauType&, const pat::Tau*, bool);
         static void FillJetType(JetType&, const pat::Jet*, bool);
         static void FillFatJetType(FatJetType&, const pat::Jet*, bool);
+        static void FillCustomFatJetType(CustomFatJetType&, const pat::Jet*, bool);
         static void FillMEtType(MEtType&, const pat::MET*, bool);
 //        static void FillMEtCorType(MEtCorType&, const pat::MET*, bool);
         static void FillMEtFullType(MEtFullType&, const pat::MET*, bool);
@@ -37,6 +38,7 @@ class ObjectsFormat {
         static void ResetTauType(TauType&);
         static void ResetJetType(JetType&);
         static void ResetFatJetType(FatJetType&);
+        static void ResetCustomFatJetType(CustomFatJetType&);
         static void ResetMEtType(MEtType&);
 //        static void ResetMEtCorType(MEtCorType&);
         static void ResetMEtFullType(MEtFullType&);
@@ -49,6 +51,7 @@ class ObjectsFormat {
         static std::string ListTauType();
         static std::string ListJetType();
         static std::string ListFatJetType();
+        static std::string ListCustomFatJetType();
         static std::string ListMEtType();
 //        static std::string ListMEtCorType();
         static std::string ListMEtFullType();

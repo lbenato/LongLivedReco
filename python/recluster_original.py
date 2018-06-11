@@ -11,7 +11,7 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag (process.GlobalTag, 'auto:run2_mc')
 
 ## Events to process
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(4) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 ## Input files
 process.source = cms.Source("PoolSource",
@@ -130,7 +130,7 @@ if cmssw_version.startswith("4"):
     _chsalgos    = _chsalgos_4x
 else:
     _stdalgos    = _stdalgos_5x
-_chsalgos = _chsalgos_5x
+    _chsalgos = _chsalgos_5x
 
 pileupJetIdProducer = cms.EDProducer('PileupJetIdProducer',
                          produceJetIds = cms.bool(True),

@@ -231,7 +231,7 @@ std::vector<pat::Jet> JetAnalyzer::FillJetVector(const edm::Event& iEvent) {
         jet.addUserInt("isTight", isTightJet(jet) ? 1 : 0);
         jet.addUserInt("isTightLepVeto", isTightLepVetoJet(jet) ? 1 : 0);
 
-	/*
+	
         if(RecalibrateJets) CorrectJet(jet, *rho_handle, PVCollection->size(), isMC);
 
         // JEC Uncertainty
@@ -268,10 +268,10 @@ std::vector<pat::Jet> JetAnalyzer::FillJetVector(const edm::Event& iEvent) {
         
         if(RecalibrateMass) CorrectMass(jet, *rho_handle, PVCollection->size(), isMC);
         if(RecalibratePuppiMass) CorrectPuppiMass(jet, isMC);
-        */
+        
 
         // JER NEW IMPLEMENTATION
-	/*
+	
         if(SmearJets) {
             JME::JetParameters TheJetParameters;
             TheJetParameters.setJetPt(jet.pt());
@@ -349,7 +349,7 @@ std::vector<pat::Jet> JetAnalyzer::FillJetVector(const edm::Event& iEvent) {
 //                 jet.setP4(smearedP4);
 //             }
 //         }
-        */
+        
 
         // Pt and eta cut
         if(jet.pt()<PtTh || fabs(jet.eta())>EtaTh) continue;
@@ -613,6 +613,8 @@ void JetAnalyzer::CorrectMass(pat::Jet& jet, float rho, float nPV, bool isMC) {
     }
     if(jet.hasUserFloat("ak8PFJetsCHSPrunedMass")) jet.addUserFloat("ak8PFJetsCHSPrunedMassCorr", jet.userFloat("ak8PFJetsCHSPrunedMass") * corr);
     if(jet.hasUserFloat("ak8PFJetsCHSSoftDropMass")) jet.addUserFloat("ak8PFJetsCHSSoftDropMassCorr", jet.userFloat("ak8PFJetsCHSSoftDropMass") * corr);
+    if(jet.hasUserFloat("ak8PFJetsPrunedMass")) jet.addUserFloat("ak8PFJetsPrunedMassCorr", jet.userFloat("ak8PFJetsPrunedMass") * corr);
+    if(jet.hasUserFloat("ak8PFJetsSoftDropMass")) jet.addUserFloat("ak8PFJetsSoftDropMassCorr", jet.userFloat("ak8PFJetsSoftDropMass") * corr);
     //if(jet.hasUserFloat("ak8PFJetsPuppiSoftDropMass")) jet.addUserFloat("ak8PFJetsPuppiSoftDropMassCorr", jet.userFloat("ak8PFJetsPuppiSoftDropMass") * corr);
 }
 
@@ -679,14 +681,19 @@ void JetAnalyzer::AddVariables(std::vector<pat::Jet>& Jets, pat::MET& MET) {
 }
 
 void JetAnalyzer::GenMatcher(std::vector<pat::Jet>& Jets, std::vector<reco::GenParticle>& Quarks, std::string label) {
-    for(unsigned int j = 0; j < Jets.size(); j++) {
+    for(unsigned int j = 0; j < Jets.size(); j++){
         for(unsigned int q = 0; q < Quarks.size(); q++) {
 	  //std::cout << "jet: " << j << " quark: " << q << " delta R: " <<fabs(reco::deltaR(Jets[j].eta(),Jets[j].phi(),Quarks[q].eta(),Quarks[q].phi()) ) << std::endl;
 	  //std::cout << ("dR_q"+std::to_string(q)).c_str() << std::endl;
 	  //std::cout <<  ("dR_"+label+std::to_string(q+1)).c_str() << std::endl;
 	  Jets[j].addUserFloat(("dR_"+label+std::to_string(q+1)).c_str(), fabs(reco::deltaR(Jets[j].eta(),Jets[j].phi(),Quarks[q].eta(),Quarks[q].phi())) );
+	  if(Jets[j].hasSubjets("SoftDrop"))
+	     {
+	       if(Jets[j].subjets("SoftDrop").size() > 0) Jets[j].addUserFloat(("dR_"+label+std::to_string(q+1)+"_sj1").c_str(), fabs(reco::deltaR(Jets[j].subjets("SoftDrop")[0]->eta(),Jets[j].subjets("SoftDrop")[0]->phi(),Quarks[q].eta(),Quarks[q].phi())) );
+	       if(Jets[j].subjets("SoftDrop").size() > 1) Jets[j].addUserFloat(("dR_"+label+std::to_string(q+1)+"_sj2").c_str(), fabs(reco::deltaR(Jets[j].subjets("SoftDrop")[1]->eta(),Jets[j].subjets("SoftDrop")[1]->phi(),Quarks[q].eta(),Quarks[q].phi())) );
+	     }
             //Jets[j].addUserFloat("quark_index", fabs(reco::deltaPhi(Jets[j].phi(), Jets[0].phi())));
-        }
+	}
     }
 }
 

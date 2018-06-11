@@ -12,8 +12,8 @@ process.MessageLogger.cerr.threshold = 'ERROR'
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000000) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000000) )#10 millions
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 
 if len(options.inputFiles) == 0:
@@ -28,7 +28,10 @@ if len(options.inputFiles) == 0:
             #MINIAOD
             #'/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-1_Summer16_MINIAOD/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-1_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_standard_mixing-Moriond17_80X_mcRun2_2016_MINIAOD/180201_104029/0000/miniaod_VBFH_SS_m40_ctau1_1.root',
             #'file:test.root'
-            'file:test_ttbar.root'
+            #'file:test_ttbar_ak8.root'
+            'file:test_ak4ak8.root'
+            #'file:testaaaaaaaaaaaaa.root'
+            #'file:/afs/desy.de/user/l/lbenato/LongLivedReconstruction/CMSSW_8_0_26_patch1/src/JMEAnalysis/JetToolbox/jettoolbox.root',
             #'file:/pnfs/desy.de/cms/tier2/store/user/lbenato/test_recluster_ak4Jets_miniaod_3May2018/ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-0p05_TuneCUETP8M1_13TeV-powheg-pythia8/test_recluster_ak4Jets_miniaod_3May2018/180503_180425/0000/test_ttbar_1.root'
             #AOD
             #'/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-1_Summer16_AODSIM/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-1_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_standard_mixing-Moriond17_80X_mcRun2_2016_AODSIM/180131_222020/0000/aodsim_VBFH_SS_m40_ctau1_1.root',
@@ -44,7 +47,7 @@ if isAOD:
     print "AOD!"
 
 process.TFileService = cms.Service( "TFileService",
-    fileName = cms.string('outputak44jun.root' if len(options.outputFile)==0 else options.outputFile),
+    fileName = cms.string('output10eventi4jun.root'),# if len(options.outputFile)==0 else options.outputFile),
     closeFileFast = cms.untracked.bool(True),
 )
 
@@ -147,7 +150,7 @@ process.BadChargedCandidateFilter.PFCandidates = cms.InputTag('packedPFCandidate
 #       ANALYZER        #
 #-----------------------#
 
-process.reconstruction = cms.EDAnalyzer('RecoStudies',
+process.reconstruction = cms.EDAnalyzer('RecoStudiesAK4AK8',
     genSet = cms.PSet(
         genProduct = cms.InputTag('generator'),
         lheProduct = cms.InputTag('externalLHEProducer'),
@@ -227,10 +230,112 @@ process.reconstruction = cms.EDAnalyzer('RecoStudies',
     ),
     jetSet = cms.PSet(
         #recoJets = cms.InputTag('ak4PFJets'),#('slimmedJetsAK8'), #selectedPatJetsAK8PFCHSPrunedPacked
-        jets = cms.InputTag('patJetsAK4PF', '','USER'),#('slimmedJets'),##('slimmedJetsAK8'), #selectedPatJetsAK8PFCHSPrunedPacked
+        jets = cms.InputTag('patJetsAK4PF'),#('slimmedJets'),##('slimmedJetsAK8'), #selectedPatJetsAK8PFCHSPrunedPacked
         jetid = cms.int32(0), # 0: no selection, 1: loose, 2: medium, 3: tight                                                                                    
         jet1pt = cms.double(15.),
         jet2pt = cms.double(15.),
+        jeteta = cms.double(2.4),
+        addQGdiscriminator = cms.bool(False),
+        recalibrateJets = cms.bool(True),#(True),!!!!!!!!!!!!!!!!!!!
+        recalibrateMass = cms.bool(False),
+        recalibratePuppiMass = cms.bool(False),
+        smearJets = cms.bool(False),#(True),!!!!!!!!!!!!!!!!!
+        vertices = cms.InputTag('offlineSlimmedPrimaryVertices'),# if not isAOD else 'offlinePrimaryVertices'),
+        rho = cms.InputTag('fixedGridRhoFastjetAll'),
+        jecUncertaintyDATA = cms.string('data/%s/%s_Uncertainty_AK4PF.txt' % (JECstring, JECstring)),#updating
+        jecUncertaintyMC = cms.string('data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_Uncertainty_AK4PF.txt'),#updating
+        jecCorrectorDATA = cms.vstring(#updating
+            'data/%s/%s_L1FastJet_AK4PF.txt' % (JECstring, JECstring),
+            'data/%s/%s_L2Relative_AK4PF.txt' % (JECstring, JECstring),
+            'data/%s/%s_L3Absolute_AK4PF.txt' % (JECstring, JECstring),
+            'data/%s/%s_L2L3Residual_AK4PF.txt' % (JECstring, JECstring),
+        ),
+        jecCorrectorMC = cms.vstring(#updating!!!
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L1FastJet_AK4PF.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L2Relative_AK4PF.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L3Absolute_AK4PF.txt',
+        ),
+        massCorrectorDATA = cms.vstring(#updating!!!
+            'data/%s/%s_L2Relative_AK4PF.txt' % (JECstring, JECstring),
+            'data/%s/%s_L3Absolute_AK4PF.txt' % (JECstring, JECstring),
+            'data/%s/%s_L2L3Residual_AK4PF.txt' % (JECstring, JECstring),
+        ),
+        massCorrectorMC = cms.vstring(#updating!!!                                                                                                           
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L2Relative_AK4PF.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L3Absolute_AK4PF.txt',
+        ),
+        massCorrectorPuppi = cms.string('data/puppiCorrSummer16.root'),#updating
+        reshapeBTag = cms.bool(True),#(True),!!!!!
+        btag = cms.string('pfCombinedInclusiveSecondaryVertexV2BJetTags'),
+        btagDB = cms.string('data/CSVv2_Moriond17_B_H.csv'),
+        jet1btag = cms.int32(0), # 0: no selection, 1: loose, 2: medium, 3: tight                                                                                                       
+        jet2btag = cms.int32(0),
+        met = cms.InputTag('slimmedMETsMuEGClean', '', '') if isReMiniAod else cms.InputTag('slimmedMETs', '', 'ALPHA'),# if not isAOD else 'pfMet', '', 'ALPHA'),
+        #recoMet = cms.InputTag('pfMet', '', 'ALPHA'),
+        metRecoil = cms.bool(False),
+        metRecoilMC = cms.string('data/recoilfit_gjetsMC_Zu1_pf_v5.root'),
+        metRecoilData = cms.string('data/recoilfit_gjetsData_Zu1_pf_v5.root'),
+        metTriggerFileName = cms.string('data/MET_trigger_eff_data_SingleMuRunBH.root'),
+        jerNameRes = cms.string('data/JER/Spring16_25nsV10_MC_PtResolution_AK4PF.txt'),#v10 is the latest                                                                            
+        jerNameSf = cms.string('data/JER/Spring16_25nsV10_MC_SF_AK4PF.txt'),#v10 is the latest
+    ),
+    chsFatJetSet = cms.PSet(
+        #recoJets = cms.InputTag('ak4PFJets'),#('slimmedJetsAK8'), #selectedPatJetsAK8PFCHSPrunedPacked
+        jets = cms.InputTag('slimmedJetsAK8'), #selectedPatJetsAK8PFCHSPrunedPacked
+        jetid = cms.int32(0), # 0: no selection, 1: loose, 2: medium, 3: tight                                                                                    
+        jet1pt = cms.double(170.),
+        jet2pt = cms.double(170.),
+        jeteta = cms.double(2.4),
+        addQGdiscriminator = cms.bool(False),
+        recalibrateJets = cms.bool(True),
+        recalibrateMass = cms.bool(False),
+        recalibratePuppiMass = cms.bool(False),
+        smearJets = cms.bool(False),
+        vertices = cms.InputTag('offlineSlimmedPrimaryVertices'),# if not isAOD else 'offlinePrimaryVertices'),
+        rho = cms.InputTag('fixedGridRhoFastjetAll'),
+        jecUncertaintyDATA = cms.string('data/%s/%s_Uncertainty_AK4PFchs.txt' % (JECstring, JECstring)),#updating
+        jecUncertaintyMC = cms.string('data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_Uncertainty_AK4PFchs.txt'),#updating
+        jecCorrectorDATA = cms.vstring(#updating
+            'data/%s/%s_L1FastJet_AK4PFchs.txt' % (JECstring, JECstring),
+            'data/%s/%s_L2Relative_AK4PFchs.txt' % (JECstring, JECstring),
+            'data/%s/%s_L3Absolute_AK4PFchs.txt' % (JECstring, JECstring),
+            'data/%s/%s_L2L3Residual_AK4PFchs.txt' % (JECstring, JECstring),
+        ),
+        jecCorrectorMC = cms.vstring(#updating!!!
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L1FastJet_AK4PFchs.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L2Relative_AK4PFchs.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L3Absolute_AK4PFchs.txt',
+        ),
+        massCorrectorDATA = cms.vstring(#updating!!!
+            'data/%s/%s_L2Relative_AK4PFchs.txt' % (JECstring, JECstring),
+            'data/%s/%s_L3Absolute_AK4PFchs.txt' % (JECstring, JECstring),
+            'data/%s/%s_L2L3Residual_AK4PFchs.txt' % (JECstring, JECstring),
+        ),
+        massCorrectorMC = cms.vstring(#updating!!!                                                                                                           
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L2Relative_AK4PFchs.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L3Absolute_AK4PFchs.txt',
+        ),
+        massCorrectorPuppi = cms.string('data/puppiCorrSummer16.root'),#updating
+        reshapeBTag = cms.bool(True),
+        btag = cms.string('pfCombinedInclusiveSecondaryVertexV2BJetTags'),
+        btagDB = cms.string('data/CSVv2_Moriond17_B_H.csv'),
+        jet1btag = cms.int32(0), # 0: no selection, 1: loose, 2: medium, 3: tight                                                                                                       
+        jet2btag = cms.int32(0),
+        met = cms.InputTag('slimmedMETsMuEGClean', '', '') if isReMiniAod else cms.InputTag('slimmedMETs', '', 'ALPHA'),# if not isAOD else 'pfMet', '', 'ALPHA'),
+        #recoMet = cms.InputTag('pfMet', '', 'ALPHA'),
+        metRecoil = cms.bool(False),
+        metRecoilMC = cms.string('data/recoilfit_gjetsMC_Zu1_pf_v5.root'),
+        metRecoilData = cms.string('data/recoilfit_gjetsData_Zu1_pf_v5.root'),
+        metTriggerFileName = cms.string('data/MET_trigger_eff_data_SingleMuRunBH.root'),
+        jerNameRes = cms.string('data/JER/Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt'),#v10 is the latest                                                                            
+        jerNameSf = cms.string('data/JER/Spring16_25nsV10_MC_SF_AK4PFchs.txt'),#v10 is the latest
+    ),
+    fatJetSet = cms.PSet(
+        jets = cms.InputTag('packedPatJetsAK8'),# '','USER'),#('patJetsAk8CHSJetsSoftDropPacked'),#('patJetsAK8PF', '','USER'),
+        #jets = cms.InputTag('slimmedJetsAK8'),#('patJetsAK8PF'),#('slimmedJetsAK8'), #try AK8 first
+        jetid = cms.int32(0), # 0: no selection, 1: loose, 2: medium, 3: tight                                                                                    
+        jet1pt = cms.double(50.),
+        jet2pt = cms.double(50.),
         jeteta = cms.double(2.4),
         addQGdiscriminator = cms.bool(False),
         recalibrateJets = cms.bool(True),#(True),!!!!!!!!!!!!!!!!!!!
@@ -280,6 +385,7 @@ process.reconstruction = cms.EDAnalyzer('RecoStudies',
     minGenBpt = cms.double(15.),
     maxGenBeta = cms.double(2.4),
     writeNJets = cms.int32(8),
+    writeNFatJets = cms.int32(8),
     writeNGenBquarks = cms.int32(4),
     writeNGenLongLiveds = cms.int32(2),
     verbose = cms.bool(True),

@@ -48,6 +48,8 @@
 #include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
+//#include "DataFormats/JetReco/interface/PileupJetIdentifier.h"
+
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "TTree.h"
@@ -55,6 +57,7 @@
 //#include "RecoStudies.h"
 #include "JetAnalyzer.h"
 #include "GenAnalyzer.h"
+#include "PileupAnalyzer.h"
 #include "Objects.h"
 #include "ObjectsFormat.h"
 
@@ -100,6 +103,7 @@ class RecoStudies : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
     //edm::EDGetToken token_tipo;
     //const edm::TypeID tipo;
     edm::ParameterSet GenPSet;
+    edm::ParameterSet PileupPSet;
     edm::ParameterSet CHSJetPSet;
     edm::ParameterSet JetPSet;
     //edm::ParameterSet RecoJetPSet;
@@ -108,8 +112,10 @@ class RecoStudies : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
     JetAnalyzer* theCHSJetAnalyzer;
     JetAnalyzer* theJetAnalyzer;
     GenAnalyzer* theGenAnalyzer;
+    PileupAnalyzer* thePileupAnalyzer;
 
     //int WriteNElectrons, WriteNMuons, WriteNLeptons, WriteNTaus, WriteNPhotons, WriteNFatJets;
+    double MinGenBpt, MaxGenBeta;
     int WriteNJets, WriteNGenBquarks, WriteNGenLongLiveds;
 
     std::vector<JetType> Jets;
@@ -126,6 +132,7 @@ class RecoStudies : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
     //bool fatjet1_isLoose, fatjet1_isTight, muon1_isLoose, muon1_isTight;
     //long int nTightMuons, nTightElectrons, nTightFatJets, nLooseMuons, nLooseElectrons, nLooseFatJets;
     long int nLooseJets, nTightJets, nJets, nLooseCHSJets, nTightCHSJets, nCHSJets, nGenBquarks, nGenLL;
+    float PUWeight;
     //bool   trig_bit_pfmet110_pfmht110;
     //bool   trig_bit_pfmet120_pfmht120;
     //bool   trig_bit_pfmet120_pfmht120_PFHT60;
@@ -209,8 +216,11 @@ class RecoStudies : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 //RecoStudies::RecoStudies(const edm::ParameterSet& iConfig, edm::ConsumesCollector&& CColl):
 RecoStudies::RecoStudies(const edm::ParameterSet& iConfig):
     GenPSet(iConfig.getParameter<edm::ParameterSet>("genSet")),
+    PileupPSet(iConfig.getParameter<edm::ParameterSet>("pileupSet")),
     CHSJetPSet(iConfig.getParameter<edm::ParameterSet>("chsJetSet")),
     JetPSet(iConfig.getParameter<edm::ParameterSet>("jetSet")),
+    MinGenBpt(iConfig.getParameter<double>("minGenBpt")),
+    MaxGenBeta(iConfig.getParameter<double>("maxGenBeta")),
     WriteNJets(iConfig.getParameter<int>("writeNJets")),
     WriteNGenBquarks(iConfig.getParameter<int>("writeNGenBquarks")),
     WriteNGenLongLiveds(iConfig.getParameter<int>("writeNGenLongLiveds")),
@@ -221,6 +231,7 @@ RecoStudies::RecoStudies(const edm::ParameterSet& iConfig):
     theCHSJetAnalyzer      = new JetAnalyzer(CHSJetPSet, consumesCollector());
     theJetAnalyzer      = new JetAnalyzer(JetPSet, consumesCollector());
     theGenAnalyzer      = new GenAnalyzer(GenPSet, consumesCollector());
+    thePileupAnalyzer   = new PileupAnalyzer(PileupPSet, consumesCollector());
 
 
     //Input tags
@@ -270,7 +281,8 @@ RecoStudies::RecoStudies(const edm::ParameterSet& iConfig):
     tree -> Branch("EventNumber" , &EventNumber , "EventNumber/L");
     tree -> Branch("LumiNumber" , &LumiNumber , "LumiNumber/L");
     tree -> Branch("RunNumber" , &RunNumber , "RunNumber/L");
-    //tree -> Branch("nPV" , &nPV , "nPV/L");
+    tree -> Branch("nPV" , &nPV , "nPV/L");
+    tree -> Branch("PUWeight", &PUWeight, "PUWeight/F");
     //tree -> Branch("nLooseMuons" , &nLooseMuons , "nLooseMuons/L");
     //tree -> Branch("nLooseElectrons" , &nLooseElectrons , "nLooseElectrons/L");
     //tree -> Branch("nLooseFatJets" , &nLooseFatJets , "nLooseFatJets/L");
@@ -386,8 +398,8 @@ RecoStudies::~RecoStudies()
     delete theCHSJetAnalyzer;
     delete theJetAnalyzer;
     delete theGenAnalyzer;
+    delete thePileupAnalyzer;
 }
-
 
 //
 // member functions
@@ -403,12 +415,16 @@ RecoStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     // Initialize types
     for(int i = 0; i < WriteNJets; i++) ObjectsFormat::ResetJetType(Jets[i]);
+    for(int i = 0; i < WriteNJets; i++) ObjectsFormat::ResetJetType(CHSJets[i]);//!!
     for(int i = 0; i < WriteNGenBquarks; i++) ObjectsFormat::ResetGenPType(GenBquarks[i]);
     for(int i = 0; i < WriteNGenLongLiveds; i++) ObjectsFormat::ResetGenPType(GenLongLiveds[i]);
 
     isMC = false;
-    EventNumber = LumiNumber = RunNumber = nPV = 0;
-    nJets = nLooseJets = nTightJets = nCHSJets = nLooseCHSJets = nTightCHSJets = nGenBquarks = nGenLL = 0;
+    EventNumber = LumiNumber = RunNumber = 0;
+    nJets = nLooseJets = nTightJets = nCHSJets = nLooseCHSJets = nTightCHSJets = nGenBquarks = nGenLL = nPV = 0;
+    PUWeight = 1.;
+    MinGenBpt = -1.;
+    MaxGenBeta = -9.;
     //nTightMuons = nTightElectrons = nTightFatJets = nLooseMuons = nLooseElectrons = nLooseFatJets = 0;
 
     //trig_bit_pfmet110_pfmht110 = false;
@@ -533,11 +549,13 @@ RecoStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     std::vector<reco::GenParticle> GenBquarksVect;
     if(nGenLL>0)
       {
-	GenBquarksVect = theGenAnalyzer->FillGenVectorByIdStatusAndMother(iEvent,5,23,9000006);
+	//GenBquarksVect = theGenAnalyzer->FillGenVectorByIdStatusAndMother(iEvent,5,23,9000006);
+	GenBquarksVect = theGenAnalyzer->FillGenVectorByIdStatusAndMotherAndKin(iEvent,5,23,9000006,float(MinGenBpt),float(MaxGenBeta));
       }
     else
       {
-	GenBquarksVect = theGenAnalyzer->FillGenVectorByIdAndStatus(iEvent,5,23);
+	//GenBquarksVect = theGenAnalyzer->FillGenVectorByIdAndStatus(iEvent,5,23);
+	GenBquarksVect = theGenAnalyzer->FillGenVectorByIdAndStatusAndKin(iEvent,5,23,float(MinGenBpt),float(MaxGenBeta));
       }
     //std::vector<reco::GenParticle> GenBquarksVect = theGenAnalyzer->FillGenVectorByIdAndStatus(iEvent,5,23);
     nGenBquarks = GenBquarksVect.size();
@@ -564,6 +582,26 @@ RecoStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     //nGenBquarks = GenBquarksVect.size();
     //std::cout << "nGenB quark " << nGenBquarks << std::endl;
     //std::cout << "nGenB quark from LL only " << GenBquarksFromLLVect.size() << std::endl;
+
+
+    // Pu weight
+    PUWeight     = thePileupAnalyzer->GetPUWeight(iEvent);
+    ////PUWeightUp   = thePileupAnalyzer->GetPUWeightUp(iEvent);
+    ////PUWeightDown = thePileupAnalyzer->GetPUWeightDown(iEvent);
+    nPV = thePileupAnalyzer->GetPV(iEvent);
+    ////EventWeight *= PUWeight;
+
+    //Vertices
+    /*
+    edm::Handle<reco::VertexCollection> VertexColl;
+    iEvent.getByToken( vertexToken, VertexColl);
+    nPV = VertexColl->size();
+    const reco::Vertex* vertex=&VertexColl->front();
+    reco::TrackBase::Point vtxPoint(0,0,0);
+    if(  VertexColl->size() >= 1 ) {
+        vtxPoint = VertexColl->at(0).position();
+    }
+    */
 
     // Jets
     std::vector<pat::Jet> CHSJetsVect = theCHSJetAnalyzer->FillJetVector(iEvent);
@@ -707,17 +745,7 @@ RecoStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     theCHSJetAnalyzer->GenMatcher(CHSJetsVect, GenLongLivedVect, "pi");
     //theCHSJetAnalyzer->GenMatcher(FatJetsVect, GenLongLivedVect, "pi");
 
-    /*
-    //Vertices
-    edm::Handle<reco::VertexCollection> VertexColl;
-    iEvent.getByToken( vertexToken, VertexColl);
-    nPV = VertexColl->size();
-    const reco::Vertex* vertex=&VertexColl->front();
-    reco::TrackBase::Point vtxPoint(0,0,0);
-    if(  VertexColl->size() >= 1 ) {
-        vtxPoint = VertexColl->at(0).position();
-    }
-    */
+    
 
 
     if(isVerbose) {
@@ -730,10 +758,10 @@ RecoStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       //for(unsigned int i = 0; i < TauVect.size(); i++) std::cout << "  tau  [" << i << "]\tpt: " << TauVect[i].pt() << "\teta: " << TauVect[i].eta() << "\tphi: " << TauVect[i].phi() << std::endl;
       //std::cout << "number of photons:  " << PhotonVect.size() << std::endl;
       //for(unsigned int i = 0; i < PhotonVect.size(); i++) std::cout << "  photon  [" << i << "]\tpt: " << PhotonVect[i].pt() << "\teta: " << PhotonVect[i].eta() << "\tphi: " << PhotonVect[i].phi() << std::endl;
-      //std::cout << "number of CHS AK4 jets:  " << CHSJetsVect.size() << std::endl;
-      //for(unsigned int i = 0; i < CHSJetsVect.size(); i++) std::cout << "  CHS AK4 jet  [" << i << "]\tpt: " << CHSJetsVect[i].pt() << "\teta: " << CHSJetsVect[i].eta() << "\tphi: " << CHSJetsVect[i].phi() << "\tmass: " << CHSJetsVect[i].mass() << std::endl;
-      //std::cout << "number of AK4 jets:  " << JetsVect.size() << std::endl;
-      //for(unsigned int i = 0; i < JetsVect.size(); i++) std::cout << "  AK4 jet  [" << i << "]\tpt: " << JetsVect[i].pt() << "\teta: " << JetsVect[i].eta() << "\tphi: " << JetsVect[i].phi() << "\tmass: " << JetsVect[i].mass() << std::endl;
+      std::cout << "number of CHS AK4 jets:  " << CHSJetsVect.size() << std::endl;
+      for(unsigned int i = 0; i < CHSJetsVect.size(); i++) std::cout << "  CHS AK4 jet  [" << i << "]\tpt: " << CHSJetsVect[i].pt() << "\teta: " << CHSJetsVect[i].eta() << "\tphi: " << CHSJetsVect[i].phi() << "\tmass: " << CHSJetsVect[i].mass() << std::endl;
+      std::cout << "number of AK4 jets:  " << JetsVect.size() << std::endl;
+      for(unsigned int i = 0; i < JetsVect.size(); i++) std::cout << "  AK4 jet  [" << i << "]\tpt: " << JetsVect[i].pt() << "\teta: " << JetsVect[i].eta() << "\tphi: " << JetsVect[i].phi() << "\tmass: " << JetsVect[i].mass() << std::endl;
       //std::cout << "number of Gen B quarks:  " << GenBquarksVect.size() << std::endl;
       //for(unsigned int i = 0; i < GenBquarksVect.size(); i++) std::cout << "  Gen B quark  [" << i << "]\tpt: " << GenBquarksVect[i].pt() << "\teta: " << GenBquarksVect[i].eta() << "\tphi: " << GenBquarksVect[i].phi() << "\tmass: " << GenBquarksVect[i].mass() << std::endl;
       //std::cout << "number of AK8 jets:  " << FatJetsVect.size() << std::endl;
