@@ -18,7 +18,7 @@ whitelist = []
 
 TIP = "/pnfs/desy.de/cms/tier2/store/user/lbenato/"
 #DEST = "/afs/desy.de/user/l/lbenato/LongLivedReconstruction/CMSSW_8_0_26_patch1/src/Analyzer/LongLivedReco/test_recluster_ak4Jets_miniaod_3May2018/"
-DEST = "/nfs/dust/cms/user/lbenato/RecoStudies_ntuples_v5/"
+DEST = "/nfs/dust/cms/user/lbenato/RecoStudies_ntuples_v4/"
 
 ########## DO NOT TOUCH BELOW THIS POINT ##########
 
@@ -52,15 +52,18 @@ def hadd_singoli(name):
     #if "TT_Tune" in name:
     #    print name
     #    os.system('hadd -f '+DEST+name+'.root '+name+'/*/*/*/output_1*.root')        
-    if ("QCD_HT" in name) or ("TT_Tune" in name):
+    if ("TT_Tune" in name):
         print name
         #os.system('hadd -f '+DEST+name+'.root '+name+'/*/*/*/*.root')# + ' ' +name+'/*/*/*/*_1.root')        
+    elif ("QCD_HT50To100" in name) or ("QCD_HT100To200" in name):
+        print name
+        os.system('hadd -f '+DEST+name+'.root '+name+'/*/*/*/*.root')# + ' ' +name+'/*/*/*/*_1.root')
     elif ("ZH" in name):
         print name
         #os.system('hadd -f '+DEST+short_name+'.root '+name+'/*/*/*/*.root')
     else:
         print name
-        os.system('hadd -f '+DEST+short_name+'.root '+name+'/*/*/*/*.root')
+        #os.system('hadd -f '+DEST+short_name+'.root '+name+'/*/*/*/*.root')
         #os.system('ls '+DEST+name+'.root\n')
 pass
 
