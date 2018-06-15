@@ -1176,3 +1176,117 @@ void ObjectsFormat::ResetGenPType(GenPType& I) {
 }
 
 std::string ObjectsFormat::ListGenPType() {return "pt/F:eta/F:phi/F:mass/F:energy/F:charge/I:pdgId/I:status/I:radius/F:motherid/I";}
+
+
+//*******************//
+//    Calo Jets      //
+//*******************//
+
+void ObjectsFormat::FillCaloJetType(CaloJetType& I, const reco::CaloJet* R, bool isMC) {
+    if(!R) return;
+    I.pt          = R->pt();
+    I.eta         = R->eta();
+    I.phi         = R->phi();
+    I.mass        = R->mass();
+    I.energy      = R->energy();
+    I.chf         = -1.;//R->chargedHadronEnergyFraction();
+    I.nhf         = -1.;//R->neutralHadronEnergyFraction();
+    I.phf         = -1.;//R->neutralEmEnergyFraction();
+    I.elf         = -1.;//R->chargedEmEnergyFraction();
+    I.muf         = -1.;//R->muonEnergyFraction();
+    I.chm         = -1.;//R->chargedHadronMultiplicity();
+    I.npr         = -1.;//R->chargedMultiplicity() + R->neutralMultiplicity();
+    I.cm          = -1.;//R->chargedMultiplicity();
+    I.nm          = -1.;//R->neutralMultiplicity();
+    I.isMatched   = 0;//(I.mother==25);
+    I.isLoose     = false;//R->hasUserInt("isLoose") ? R->userInt("isLoose") : false;
+    I.isMedium    = false;
+    I.isTight     = false;//R->hasUserInt("isTight") ? R->userInt("isTight") : false;
+    I.isTightLepVeto     = false;//R->hasUserInt("isTightLepVeto") ? R->userInt("isTightLepVeto") : false;
+    I.isCSVL      = false;//R->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags")>0.460 ? true : false;
+    I.isCSVM      = false;//R->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags")>0.800 ? true : false;
+    I.isCSVT      = false;//R->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags")>0.935 ? true : false;
+    I.isMatched   = false;
+    I.dR_q1       = 1000;//R->hasUserFloat("dR_q1") ? R->userFloat("dR_q1") : 1000;
+    I.dR_q2       = 1000;//R->hasUserFloat("dR_q2") ? R->userFloat("dR_q2") : 1000;
+    I.dR_q3       = 1000;//R->hasUserFloat("dR_q3") ? R->userFloat("dR_q3") : 1000;
+    I.dR_q4       = 1000;//R->hasUserFloat("dR_q4") ? R->userFloat("dR_q4") : 1000;
+    I.m_q1        = false;//R->hasUserFloat("dR_q1") ? (R->userFloat("dR_q1")<0.4 ? true : false) : false;
+    I.m_q2        = false;//R->hasUserFloat("dR_q2") ? (R->userFloat("dR_q2")<0.4 ? true : false) : false;
+    I.m_q3        = false;//R->hasUserFloat("dR_q3") ? (R->userFloat("dR_q3")<0.4 ? true : false) : false;
+    I.m_q4        = false;//R->hasUserFloat("dR_q4") ? (R->userFloat("dR_q4")<0.4 ? true : false) : false;
+    I.dR_pi1      = 1000;//R->hasUserFloat("dR_pi1") ? R->userFloat("dR_pi1") : 1000;
+    I.dR_pi2      = 1000;//R->hasUserFloat("dR_pi2") ? R->userFloat("dR_pi2") : 1000;
+    I.matchBquark = -1.;//R->hasUserInt("hasMatchedBquarks") ? R->userInt("hasMatchedBquarks") : -1;
+    I.matchLL     = -1.;//R->hasUserInt("hasMatchedLL") ? R->userInt("hasMatchedLL") : -1;
+    I.original_jet_index     = -1.;//R->hasUserInt("original_jet_index") ? R->userInt("original_jet_index") : -1;
+}
+
+void ObjectsFormat::ResetCaloJetType(CaloJetType& I) {
+    I.pt          = -1.;
+    I.eta         = -9.;
+    I.phi         = -9.;
+    I.mass        = -1.;
+    I.energy      = -1.;
+    //    I.ptRaw       = -1.;
+    I.ptUnc       = -1.;
+    I.dPhi_met    = -1.;
+    I.dPhi_Jet1   = -1.;
+    I.puId        = -1.;
+    I.CSV         = -99.;
+    I.CSVR        = -99.;
+    I.CSVRUp      = -99.;
+    I.CSVRDown    = -99.;
+    I.CMVA        = -99.;
+    I.CMVAR       = -99.;
+    I.CMVARUp     = -99.;
+    I.CMVARDown   = -99.;
+    I.QGLikelihood = -1.;
+    I.chf         = -1.;
+    I.nhf         = -1.;
+    I.phf         = -1.;
+    I.elf         = -1.;
+    I.muf         = -1.;
+    I.ptGenJ      = -10.;
+    I.etaGenJ     = -4.;
+    I.phiGenJ     = -4.;
+    I.massGenJ    = -10.;
+    I.ptGen       = -10.;
+    I.etaGen      = -4.;
+    I.phiGen      = -4.;
+    I.massGen     = -10.;
+    I.pdgIdGen     = 0.;
+    I.ptLhe       = -10.;
+    I.etaLhe      = -4.;
+    I.phiLhe      = -4.;
+    I.chm         = -1;
+    I.npr         = -1;
+    I.cm          = -1;
+    I.nm          = -1;
+    I.partonFlavour     = 0;
+    I.hadronFlavour     = 0;
+    I.mother      = false;
+    I.isLoose     = false;
+    I.isMedium    = false;
+    I.isTight     = false;
+    I.isTightLepVeto     = false;
+    I.isCSVL      = false;
+    I.isCSVM      = false;
+    I.isCSVT      = false;
+    I.isMatched   = false;
+    I.dR_q1       = 1000.;
+    I.dR_q2       = 1000.;
+    I.dR_q3       = 1000.;
+    I.dR_q4       = 1000.;
+    I.m_q1        = false;
+    I.m_q2        = false;
+    I.m_q3        = false;
+    I.m_q4        = false;
+    I.dR_pi1      = 1000.;
+    I.dR_pi2      = 1000.;
+    I.matchBquark = -1;
+    I.matchLL     = -1;
+    I.original_jet_index = -1;
+}
+
+std::string ObjectsFormat::ListCaloJetType() {return "pt/F:eta/F:phi/F:mass/F:energy/F:ptUnc/F:dPhi_met/F:dPhi_Jet1/F:puId/F:CSV/F:CSVR/F:CSVRUp/F:CSVRDown/F:CMVA/F:CMVAR/F:CMVARUp/F:CMVARDown/F:QGLikelihood/F:chf/F:nhf/F:phf/F:elf/F:muf/F:ptGenJ/F:etaGenJ/F:phiGenJ/F:massGenJ/F:ptGen/F:etaGen/F:phiGen/F:massGen/F:pdgIdGen/I:ptLhe/F:etaLhe/F:phiLhe/I:chm/I:npr/I:cm/I:nm/I:partonFlavour/I:hadronFlavour/I:mother/I:isLoose/O:isMedium/O:isTight/O:isTightLepVeto/O:isCSVL/O:isCSVM/O:isCSVT/O:isMatched/O:dR_q1/F:dR_q2/F:dR_q3/F:dR_q4/F:m_q1/O:m_q2/O:m_q3/O:m_q4/O:dR_pi1/F:dR_pi2/F:matchBquark/I:matchLL/I:original_jet_index/I";}

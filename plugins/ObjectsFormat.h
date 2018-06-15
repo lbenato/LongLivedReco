@@ -9,6 +9,8 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
+#include "DataFormats/JetReco/interface/CaloJet.h"
+#include "DataFormats/JetReco/interface/CaloJetCollection.h"
 
 #include "Utilities.h"
 #include "Objects.h"
@@ -24,6 +26,7 @@ class ObjectsFormat {
         static void FillPhotonType(PhotonType&, const pat::Photon*, bool);
         static void FillTauType(TauType&, const pat::Tau*, bool);
         static void FillJetType(JetType&, const pat::Jet*, bool);
+        static void FillCaloJetType(CaloJetType&, const reco::CaloJet*, bool);//new
         static void FillFatJetType(FatJetType&, const pat::Jet*, bool);
         static void FillCustomFatJetType(CustomFatJetType&, const pat::Jet*, bool);
         static void FillMEtType(MEtType&, const pat::MET*, bool);
@@ -37,6 +40,7 @@ class ObjectsFormat {
         static void ResetPhotonType(PhotonType&);
         static void ResetTauType(TauType&);
         static void ResetJetType(JetType&);
+        static void ResetCaloJetType(CaloJetType&);//new
         static void ResetFatJetType(FatJetType&);
         static void ResetCustomFatJetType(CustomFatJetType&);
         static void ResetMEtType(MEtType&);
@@ -50,6 +54,7 @@ class ObjectsFormat {
         static std::string ListPhotonType();
         static std::string ListTauType();
         static std::string ListJetType();
+        static std::string ListCaloJetType();
         static std::string ListFatJetType();
         static std::string ListCustomFatJetType();
         static std::string ListMEtType();
