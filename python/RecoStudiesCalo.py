@@ -8,7 +8,7 @@ process = cms.Process("USER")
 
 
 ## Events to process
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 ## Input files
 process.source = cms.Source("PoolSource",
@@ -574,6 +574,9 @@ if isData:
     process.source.lumisToProcess = LumiList.LumiList(filename = 'data/JSON/'+jsonName+'.txt').getVLuminosityBlockRange()
     print "JSON file loaded: ", jsonName
 
+# Trigger filter
+triggerTag = 'HLT2' if isReHLT else 'HLT'
+
 # MET filters
 process.load('RecoMET.METFilters.BadPFMuonFilter_cfi')
 process.BadPFMuonFilter.muons = cms.InputTag('slimmedMuons')# if not isAOD else 'muons')
@@ -582,6 +585,11 @@ process.BadPFMuonFilter.PFCandidates = cms.InputTag('packedPFCandidates')# if no
 process.load('RecoMET.METFilters.BadChargedCandidateFilter_cfi')
 process.BadChargedCandidateFilter.muons = cms.InputTag('slimmedMuons')# if not isAOD else 'muons')
 process.BadChargedCandidateFilter.PFCandidates = cms.InputTag('packedPFCandidates')# if not isAOD else 'PFCandidates')
+
+if isData:
+    filterString = "RECO"
+else:
+    filterString = "PAT"
 
 #-----------------------#
 #       ANALYZER        #
@@ -613,6 +621,22 @@ process.reconstruction = cms.EDAnalyzer('RecoStudiesCalo',
         mcFileName = cms.string('data/PU_MC_Moriond17.root'),#updated
         dataName = cms.string('pileup'),
         mcName = cms.string('2016_25ns_Moriond17MC_PoissonOOTPU'),#updated
+    ),
+    triggerSet = cms.PSet(
+        trigger = cms.InputTag('TriggerResults', '', triggerTag),
+        #paths = cms.vstring('HLT_IsoMu24_v','HLT_IsoTkMu24_v','HLT_Mu50_v','HLT_Mu55_v','HLT_Ele27_WPTight_Gsf_v','HLT_Ele27_WPLoose_Gsf_WHbbBoost_v','HLT_Ele27_eta2p1_WPLoose_Gsf_HT200_v','HLT_Mu3_PFJet40_v','HLT_Ele8_CaloIdM_TrackIdM_PFJet30_v','HLT_Ele17_CaloIdM_TrackIdM_PFJet30_v','HLT_Ele23_CaloIdM_TrackIdM_PFJet30_v','HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet140_v','HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v','HLT_PFHT350_PFMET100_JetIdCleaned_v','HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq500_v','HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq240_v','HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq460_v','HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq500_v','HLT_QuadPFJet45_TripleBtagCSV_p087_v','HLT_QuadPFJet45_DoubleBtagCSV_p087_v','HLT_QuadPFJet_VBF_v','HLT_L1_TripleJet_VBF_v','HLT_PFJet450_v','HLT_PFJet500_v','HLT_DiPFJetAve80_v','HLT_VBF_DisplacedJet40_DisplacedTrack_v','HLT_VBF_DisplacedJet40_DisplacedTrack_2TrackIP2DSig5_v','HLT_VBF_DisplacedJet40_TightID_DisplacedTrack_v','HLT_VBF_DisplacedJet40_VTightID_Hadronic_v','HLT_VBF_DisplacedJet40_VVTightID_Hadronic_v','HLT_VBF_DisplacedJet40_VTightID_DisplacedTrack_v','HLT_VBF_DisplacedJet40_VVTightID_DisplacedTrack_v','HLT_HT650_DisplacedDijet80_Inclusive_v','HLT_HT750_DisplacedDijet80_Inclusive_v','HLT_HT350_DisplacedDijet40_DisplacedTrack_v','HLT_HT250_DisplacedDijet40_DisplacedTrack_v','HLT_HT350_DisplacedDijet80_Tight_DisplacedTrack_v','HLT_Mu33NoFiltersNoVtxDisplaced_DisplacedJet50_Tight_v','HLT_Mu33NoFiltersNoVtxDisplaced_DisplacedJet50_Loose_v','HLT_Mu28NoFiltersNoVtx_DisplacedJet40_Loose_v','HLT_Mu38NoFiltersNoVtxDisplaced_DisplacedJet60_Tight_v','HLT_Mu38NoFiltersNoVtxDisplaced_DisplacedJet60_Loose_v','HLT_Mu38NoFiltersNoVtx_DisplacedJet60_Loose_v','HLT_Mu28NoFiltersNoVtx_CentralCaloJet40_v','HLT_HT650_v','HLT_PFHT800_v','HLT_PFHT550_4JetPt50_v','HLT_PFHT650_4JetPt50_v','HLT_PFHT750_4JetPt50_v','HLT_PFHT800_4JetPt50_v','HLT_PFHT850_4JetPt50_v','HLT_PFJet15_NoCaloMatched_v','HLT_PFJet25_NoCaloMatched_v','HLT_DiPFJet15_NoCaloMatched_v','HLT_DiPFJet25_NoCaloMatched_v','HLT_DiPFJet40_DEta3p5_MJJ600_PFMETNoMu140_v','HLT_DiCentralPFJet430_v','HLT_DoubleJetsC100_DoubleBTagCSV_p026_DoublePFJetsC160_v','HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6_v','HLT_PFHT650_WideJetMJJ900DEtaJJ1p5_v','HLT_CaloJet260_v','HLT_CaloJet500_NoJetID_v','HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDTight_BTagCSV_p067_v','HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDTight_v','HLT_HT250_CaloMET70_v',),
+        paths = cms.vstring(
+*[
+ 'HLT_Ele27_WPTight_Gsf_v',  'HLT_Ele25_eta2p1_WPTight_Gsf_v',  'HLT_Ele27_eta2p1_WPTight_Gsf_v',  'HLT_Ele32_eta2p1_WPTight_Gsf_v',  'HLT_Ele27_WPLoose_Gsf_WHbbBoost_v',  'HLT_Ele115_CaloIdVT_GsfTrkIdT_v',  'HLT_IsoMu24_v',  'HLT_IsoMu22_eta2p1_v',  'HLT_IsoTkMu24_v',  'HLT_IsoMu27_v',  'HLT_IsoTkMu22_eta2p1_v',  'HLT_IsoTkMu27_v',  'HLT_Mu50_v',  'HLT_TkMu50_v',  'HLT_Mu55_v',  'HLT_MonoCentralPFJet80_PFMETNoMu120_PFMHTNoMu120_IDTight_v',  'HLT_Ele27_eta2p1_WPLoose_Gsf_HT200_v',  'HLT_Mu6_PFHT200_PFMET100_v',  'HLT_Mu15_IsoVVVL_PFHT400_v',  'HLT_Ele15_IsoVVVL_PFHT400_v',  'HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v',  'HLT_Mu50_IsoVVVL_PFHT400_v',  'HLT_Ele50_IsoVVVL_PFHT400_v',  'HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300_v',  'HLT_Mu30_eta2p1_PFJet150_PFJet50_v',  'HLT_DoubleMu3_PFMET50_v',  'HLT_Mu15_IsoVVVL_PFHT400_PFMET50_v',  'HLT_Ele15_IsoVVVL_PFHT400_PFMET50_v',  'HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v',  'HLT_Mu38NoFiltersNoVtx_DisplacedJet60_Loose_v',  'HLT_LooseIsoPFTau50_Trk30_eta2p1_MET90_v',  'HLT_LooseIsoPFTau50_Trk30_eta2p1_MET110_v',  'HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v',  'HLT_IsoMu19_eta2p1_LooseIsoPFTau20_SingleL1_v',  'HLT_IsoMu19_eta2p1_LooseIsoPFTau20_v',  'HLT_IsoMu21_eta2p1_LooseIsoPFTau20_SingleL1_v',  'HLT_Ele27_WPTight_Gsf_L1JetTauSeeded_v',  'HLT_VLooseIsoPFTau140_Trk50_eta2p1_v',  'HLT_Mu30_TkMu11_v',  'HLT_Mu17_Mu8_SameSign_DZ_v',  'HLT_Mu40_TkMu11_v',  'HLT_Mu20_Mu10_SameSign_DZ_v',  'HLT_DoubleMu8_Mass8_PFHT300_v',  'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v',  'HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v',  'HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV_p20_v',  'HLT_AK8PFHT700_TrimR0p1PT0p03Mass50_v',  'HLT_AK8PFJet360_TrimMass30_v',  'HLT_AK8PFJet450_v',  'HLT_AK8PFJet500_v',  'HLT_BTagMu_AK8Jet300_Mu5_v',  'HLT_BTagMu_Jet300_Mu5_v',  'HLT_CaloJet500_NoJetID_v',  'HLT_DiCentralPFJet170_CFMax0p1_v',  'HLT_DiCentralPFJet330_CFMax0p5_v',  'HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v',  'HLT_DoubleJet90_Double30_TripleBTagCSV_p087_v',  'HLT_DoubleJetsC112_DoubleBTagCSV_p014_DoublePFJetsC112MaxDeta1p6_v',  'HLT_DoubleJetsC112_DoubleBTagCSV_p026_DoublePFJetsC172_v',  'HLT_DoubleMu3_PFMET50_v',  'HLT_DoubleMu8_Mass8_PFHT300_v',  'HLT_Ele115_CaloIdVT_GsfTrkIdT_v',  'HLT_Ele15_IsoVVVL_PFHT400_v',  'HLT_HT350_DisplacedDijet40_DisplacedTrack_v',  'HLT_HT350_DisplacedDijet80_DisplacedTrack_v',  'HLT_HT350_DisplacedDijet80_Tight_DisplacedTrack_v',  'HLT_HT650_DisplacedDijet80_Inclusive_v',  'HLT_HT650_v',  'HLT_HT750_DisplacedDijet80_Inclusive_v',  'HLT_LooseIsoPFTau50_Trk30_eta2p1_MET110_v',  'HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v',  'HLT_LooseIsoPFTau50_Trk30_eta2p1_MET90_v',  'HLT_MET300_v',  'HLT_Mu10_TrkIsoVVL_DiPFJet40_DEta3p5_MJJ750_HTT350_PFMETNoMu60_v',  'HLT_Mu15_IsoVVVL_PFHT400_PFMET50_v',  'HLT_Mu15_IsoVVVL_PFHT400_v',  'HLT_Mu15_IsoVVVL_PFHT600_v',  'HLT_Mu17_Mu8_SameSign_DZ_v',  'HLT_Mu25_TkMu0_dEta18_Onia_v',  'HLT_Mu30_TkMu11_v',  'HLT_Mu38NoFiltersNoVtx_DisplacedJet60_Loose_v',  'HLT_Mu38NoFiltersNoVtxDisplaced_DisplacedJet60_Loose_v',  'HLT_Mu38NoFiltersNoVtxDisplaced_DisplacedJet60_Tight_v',  'HLT_Mu40_eta2p1_PFJet200_PFJet50_v',  'HLT_Mu6_PFHT200_PFMET100_v',  'HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300_v',  'HLT_Mu8_TrkIsoVVL_DiPFJet40_DEta3p5_MJJ750_HTT300_PFMETNoMu60_v',  'HLT_PFHT350_DiPFJetAve90_PFAlphaT0p53_v',  'HLT_PFHT400_DiPFJetAve90_PFAlphaT0p52_v',  'HLT_PFHT400_SixJet30_DoubleBTagCSV_p056_v',  'HLT_PFHT450_SixJet40_BTagCSV_p056_v',  'HLT_PFHT650_WideJetMJJ900DEtaJJ1p5_v',  'HLT_PFHT650_WideJetMJJ950DEtaJJ1p5_v',  'HLT_PFHT900_v',  'HLT_PFJet450_v',  'HLT_PFJet500_v',  'HLT_PFMET400_v',  'HLT_PFMET500_v',  'HLT_PFMET600_v',  'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v',  'HLT_QuadJet45_TripleBTagCSV_p087_v',  'HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq240_v',  'HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq500_v',  'HLT_Rsq0p25_v',  'HLT_Rsq0p30_v',  'HLT_RsqMR270_Rsq0p09_MR200_4jet_v',  'HLT_TkMu50_v',  'HLT_TrkMu17_DoubleTrkMu8NoFiltersNoVtx_v',  'HLT_VBF_DisplacedJet40_DisplacedTrack_2TrackIP2DSig5_v',  'HLT_VBF_DisplacedJet40_DisplacedTrack_v',  'HLT_VBF_DisplacedJet40_VTightID_DisplacedTrack_v',  'HLT_VBF_DisplacedJet40_VTightID_Hadronic_v',  'HLT_VBF_DisplacedJet40_VVTightID_DisplacedTrack_v',  'HLT_VBF_DisplacedJet40_VVTightID_Hadronic_v',  'HLT_VLooseIsoPFTau140_Trk50_eta2p1_v',  'HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_v',  'HLT_PFMET110_PFMHT110_IDTight_v',  'HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v',  'HLT_PFMET120_PFMHT120_IDTight_v',  'HLT_MonoCentralPFJet80_PFMETNoMu110_PFMHTNoMu110_IDTight_v',  'HLT_MonoCentralPFJet80_PFMETNoMu120_PFMHTNoMu120_IDTight_v',  'HLT_PFMET170_HBHECleaned_v',  'HLT_PFHT300_PFMET110_v',  'HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDTight_BTagCSV_p067_v',  'HLT_DiPFJet40_DEta3p5_MJJ600_PFMETNoMu140_v',  'HLT_MET200_v',  'HLT_RsqMR270_Rsq0p09_MR200_v',  'HLT_PFHT250_DiPFJetAve90_PFAlphaT0p55_v',  'HLT_PFHT200_DiPFJetAve90_PFAlphaT0p63_v',  'HLT_MET250_v',  'HLT_PFHT250_DiPFJetAve90_PFAlphaT0p58_v',   'HLT_PFHT300_DiPFJetAve90_PFAlphaT0p54_v',  'HLT_PFMET300_v',  'HLT_MET75_IsoTrk50_v',  'HLT_MET90_IsoTrk50_v'
+]
+        ),
+        metfilters = cms.InputTag('TriggerResults', '', filterString),
+        metpaths = cms.vstring('Flag_HBHENoiseFilter', 'Flag_HBHENoiseIsoFilter', 'Flag_EcalDeadCellTriggerPrimitiveFilter', 'Flag_goodVertices', 'Flag_eeBadScFilter', 'Flag_globalTightHalo2016Filter','Flag_badMuons','Flag_duplicateMuons','Flag_noBadMuons') if isReMiniAod else cms.vstring('Flag_HBHENoiseFilter', 'Flag_HBHENoiseIsoFilter', 'Flag_EcalDeadCellTriggerPrimitiveFilter', 'Flag_goodVertices', 'Flag_eeBadScFilter', 'Flag_globalTightHalo2016Filter'),
+        prescales = cms.InputTag('patTrigger','','PAT'),
+        l1Minprescales = cms.InputTag('patTrigger','l1min','PAT'),
+        l1Maxprescales = cms.InputTag('patTrigger','l1max','PAT'),
+        badPFMuonFilter = cms.InputTag("BadPFMuonFilter"),
+        badChCandFilter = cms.InputTag("BadChargedCandidateFilter"),
     ),
     chsJetSet = cms.PSet(
         #recoJets = cms.InputTag('ak4PFJets'),#('slimmedJetsAK8'), #selectedPatJetsAK8PFCHSPrunedPacked
@@ -664,6 +688,58 @@ process.reconstruction = cms.EDAnalyzer('RecoStudiesCalo',
         metTriggerFileName = cms.string('data/MET_trigger_eff_data_SingleMuRunBH.root'),
         jerNameRes = cms.string('data/JER/Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt'),#v10 is the latest                                                                            
         jerNameSf = cms.string('data/JER/Spring16_25nsV10_MC_SF_AK4PFchs.txt'),#v10 is the latest
+    ),
+#PUPPI
+    puppiJetSet = cms.PSet(
+        #recoJets = cms.InputTag('ak4PFJets'),#('slimmedJetsAK8'), #selectedPatJetsAK8PFCHSPrunedPacked
+        jets = cms.InputTag('slimmedJetsPuppi'),#,#('slimmedJets'),#('slimmedJetsAK8'), #selectedPatJetsAK8PFCHSPrunedPacked
+        jetid = cms.int32(0), # 0: no selection, 1: loose, 2: medium, 3: tight                                                                                    
+        jet1pt = cms.double(15.),
+        jet2pt = cms.double(15.),
+        jeteta = cms.double(2.4),
+        addQGdiscriminator = cms.bool(False),
+        recalibrateJets = cms.bool(True),
+        recalibrateMass = cms.bool(False),
+        recalibratePuppiMass = cms.bool(False),
+        smearJets = cms.bool(False),
+        vertices = cms.InputTag('offlineSlimmedPrimaryVertices'),# if not isAOD else 'offlinePrimaryVertices'),
+        rho = cms.InputTag('fixedGridRhoFastjetAll'),
+        jecUncertaintyDATA = cms.string('data/%s/%s_Uncertainty_AK4PFPuppi.txt' % (JECstring, JECstring)),#updating
+        jecUncertaintyMC = cms.string('data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_Uncertainty_AK4PFPuppi.txt'),#updating
+        jecCorrectorDATA = cms.vstring(#updating
+            'data/%s/%s_L1FastJet_AK4PFPuppi.txt' % (JECstring, JECstring),
+            'data/%s/%s_L2Relative_AK4PFPuppi.txt' % (JECstring, JECstring),
+            'data/%s/%s_L3Absolute_AK4PFPuppi.txt' % (JECstring, JECstring),
+            'data/%s/%s_L2L3Residual_AK4PFPuppi.txt' % (JECstring, JECstring),
+        ),
+        jecCorrectorMC = cms.vstring(#updating!!!
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L1FastJet_AK4PFPuppi.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L2Relative_AK4PFPuppi.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L3Absolute_AK4PFPuppi.txt',
+        ),
+        massCorrectorDATA = cms.vstring(#updating!!!
+            'data/%s/%s_L2Relative_AK4PFPuppi.txt' % (JECstring, JECstring),
+            'data/%s/%s_L3Absolute_AK4PFPuppi.txt' % (JECstring, JECstring),
+            'data/%s/%s_L2L3Residual_AK4PFPuppi.txt' % (JECstring, JECstring),
+        ),
+        massCorrectorMC = cms.vstring(#updating!!!                                                                                                           
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L2Relative_AK4PFPuppi.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L3Absolute_AK4PFPuppi.txt',
+        ),
+        massCorrectorPuppi = cms.string('data/puppiCorrSummer16.root'),#updating
+        reshapeBTag = cms.bool(True),
+        btag = cms.string('pfCombinedInclusiveSecondaryVertexV2BJetTags'),
+        btagDB = cms.string('data/CSVv2_Moriond17_B_H.csv'),
+        jet1btag = cms.int32(0), # 0: no selection, 1: loose, 2: medium, 3: tight                                                                                                       
+        jet2btag = cms.int32(0),
+        met = cms.InputTag('slimmedMETsMuEGClean', '', '') if isReMiniAod else cms.InputTag('slimmedMETs', '', 'ALPHA'),# if not isAOD else 'pfMet', '', 'ALPHA'),
+        #recoMet = cms.InputTag('pfMet', '', 'ALPHA'),
+        metRecoil = cms.bool(False),
+        metRecoilMC = cms.string('data/recoilfit_gjetsMC_Zu1_pf_v5.root'),
+        metRecoilData = cms.string('data/recoilfit_gjetsData_Zu1_pf_v5.root'),
+        metTriggerFileName = cms.string('data/MET_trigger_eff_data_SingleMuRunBH.root'),
+        jerNameRes = cms.string('data/JER/Spring16_25nsV10_MC_PtResolution_AK4PFPuppi.txt'),#v10 is the latest                                                                            
+        jerNameSf = cms.string('data/JER/Spring16_25nsV10_MC_SF_AK4PFPuppi.txt'),#v10 is the latest
     ),
     jetSet = cms.PSet(
         #recoJets = cms.InputTag('ak4PFJets'),#('slimmedJetsAK8'), #selectedPatJetsAK8PFCHSPrunedPacked
@@ -730,27 +806,27 @@ process.reconstruction = cms.EDAnalyzer('RecoStudiesCalo',
         smearJets = cms.bool(False),
         vertices = cms.InputTag('offlineSlimmedPrimaryVertices'),# if not isAOD else 'offlinePrimaryVertices'),
         rho = cms.InputTag('fixedGridRhoFastjetAll'),
-        jecUncertaintyDATA = cms.string('data/%s/%s_Uncertainty_AK4PFchs.txt' % (JECstring, JECstring)),#updating
-        jecUncertaintyMC = cms.string('data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_Uncertainty_AK4PFchs.txt'),#updating
+        jecUncertaintyDATA = cms.string('data/%s/%s_Uncertainty_AK8PFchs.txt' % (JECstring, JECstring)),#updating
+        jecUncertaintyMC = cms.string('data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_Uncertainty_AK8PFchs.txt'),#updating
         jecCorrectorDATA = cms.vstring(#updating
-            'data/%s/%s_L1FastJet_AK4PFchs.txt' % (JECstring, JECstring),
-            'data/%s/%s_L2Relative_AK4PFchs.txt' % (JECstring, JECstring),
-            'data/%s/%s_L3Absolute_AK4PFchs.txt' % (JECstring, JECstring),
-            'data/%s/%s_L2L3Residual_AK4PFchs.txt' % (JECstring, JECstring),
+            'data/%s/%s_L1FastJet_AK8PFchs.txt' % (JECstring, JECstring),
+            'data/%s/%s_L2Relative_AK8PFchs.txt' % (JECstring, JECstring),
+            'data/%s/%s_L3Absolute_AK8PFchs.txt' % (JECstring, JECstring),
+            'data/%s/%s_L2L3Residual_AK8PFchs.txt' % (JECstring, JECstring),
         ),
         jecCorrectorMC = cms.vstring(#updating!!!
-            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L1FastJet_AK4PFchs.txt',
-            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L2Relative_AK4PFchs.txt',
-            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L3Absolute_AK4PFchs.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L1FastJet_AK8PFchs.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L2Relative_AK8PFchs.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L3Absolute_AK8PFchs.txt',
         ),
         massCorrectorDATA = cms.vstring(#updating!!!
-            'data/%s/%s_L2Relative_AK4PFchs.txt' % (JECstring, JECstring),
-            'data/%s/%s_L3Absolute_AK4PFchs.txt' % (JECstring, JECstring),
-            'data/%s/%s_L2L3Residual_AK4PFchs.txt' % (JECstring, JECstring),
+            'data/%s/%s_L2Relative_AK8PFchs.txt' % (JECstring, JECstring),
+            'data/%s/%s_L3Absolute_AK8PFchs.txt' % (JECstring, JECstring),
+            'data/%s/%s_L2L3Residual_AK8PFchs.txt' % (JECstring, JECstring),
         ),
         massCorrectorMC = cms.vstring(#updating!!!                                                                                                           
-            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L2Relative_AK4PFchs.txt',
-            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L3Absolute_AK4PFchs.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L2Relative_AK8PFchs.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L3Absolute_AK8PFchs.txt',
         ),
         massCorrectorPuppi = cms.string('data/puppiCorrSummer16.root'),#updating
         reshapeBTag = cms.bool(True),
@@ -764,8 +840,8 @@ process.reconstruction = cms.EDAnalyzer('RecoStudiesCalo',
         metRecoilMC = cms.string('data/recoilfit_gjetsMC_Zu1_pf_v5.root'),
         metRecoilData = cms.string('data/recoilfit_gjetsData_Zu1_pf_v5.root'),
         metTriggerFileName = cms.string('data/MET_trigger_eff_data_SingleMuRunBH.root'),
-        jerNameRes = cms.string('data/JER/Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt'),#v10 is the latest                                                                            
-        jerNameSf = cms.string('data/JER/Spring16_25nsV10_MC_SF_AK4PFchs.txt'),#v10 is the latest
+        jerNameRes = cms.string('data/JER/Spring16_25nsV10_MC_PtResolution_AK8PFchs.txt'),#v10 is the latest                                                                            
+        jerNameSf = cms.string('data/JER/Spring16_25nsV10_MC_SF_AK8PFchs.txt'),#v10 is the latest
     ),
     fatJetSet = cms.PSet(
         jets = cms.InputTag('packedPatJetsAK8'),# '','USER'),#('patJetsAk8CHSJetsSoftDropPacked'),#('patJetsAK8PF', '','USER'),
@@ -781,27 +857,27 @@ process.reconstruction = cms.EDAnalyzer('RecoStudiesCalo',
         smearJets = cms.bool(False),#(True),!!!!!!!!!!!!!!!!!
         vertices = cms.InputTag('offlineSlimmedPrimaryVertices'),# if not isAOD else 'offlinePrimaryVertices'),
         rho = cms.InputTag('fixedGridRhoFastjetAll'),
-        jecUncertaintyDATA = cms.string('data/%s/%s_Uncertainty_AK4PF.txt' % (JECstring, JECstring)),#updating
-        jecUncertaintyMC = cms.string('data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_Uncertainty_AK4PF.txt'),#updating
+        jecUncertaintyDATA = cms.string('data/%s/%s_Uncertainty_AK8PF.txt' % (JECstring, JECstring)),#updating
+        jecUncertaintyMC = cms.string('data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_Uncertainty_AK8PF.txt'),#updating
         jecCorrectorDATA = cms.vstring(#updating
-            'data/%s/%s_L1FastJet_AK4PF.txt' % (JECstring, JECstring),
-            'data/%s/%s_L2Relative_AK4PF.txt' % (JECstring, JECstring),
-            'data/%s/%s_L3Absolute_AK4PF.txt' % (JECstring, JECstring),
-            'data/%s/%s_L2L3Residual_AK4PF.txt' % (JECstring, JECstring),
+            'data/%s/%s_L1FastJet_AK8PF.txt' % (JECstring, JECstring),
+            'data/%s/%s_L2Relative_AK8PF.txt' % (JECstring, JECstring),
+            'data/%s/%s_L3Absolute_AK8PF.txt' % (JECstring, JECstring),
+            'data/%s/%s_L2L3Residual_AK8PF.txt' % (JECstring, JECstring),
         ),
         jecCorrectorMC = cms.vstring(#updating!!!
-            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L1FastJet_AK4PF.txt',
-            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L2Relative_AK4PF.txt',
-            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L3Absolute_AK4PF.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L1FastJet_AK8PF.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L2Relative_AK8PF.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L3Absolute_AK8PF.txt',
         ),
         massCorrectorDATA = cms.vstring(#updating!!!
-            'data/%s/%s_L2Relative_AK4PF.txt' % (JECstring, JECstring),
-            'data/%s/%s_L3Absolute_AK4PF.txt' % (JECstring, JECstring),
-            'data/%s/%s_L2L3Residual_AK4PF.txt' % (JECstring, JECstring),
+            'data/%s/%s_L2Relative_AK8PF.txt' % (JECstring, JECstring),
+            'data/%s/%s_L3Absolute_AK8PF.txt' % (JECstring, JECstring),
+            'data/%s/%s_L2L3Residual_AK8PF.txt' % (JECstring, JECstring),
         ),
         massCorrectorMC = cms.vstring(#updating!!!                                                                                                           
-            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L2Relative_AK4PF.txt',
-            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L3Absolute_AK4PF.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L2Relative_AK8PF.txt',
+            'data/Summer16_23Sep2016V3_MC/Summer16_23Sep2016V3_MC_L3Absolute_AK8PF.txt',
         ),
         massCorrectorPuppi = cms.string('data/puppiCorrSummer16.root'),#updating
         reshapeBTag = cms.bool(True),#(True),!!!!!
@@ -815,17 +891,18 @@ process.reconstruction = cms.EDAnalyzer('RecoStudiesCalo',
         metRecoilMC = cms.string('data/recoilfit_gjetsMC_Zu1_pf_v5.root'),
         metRecoilData = cms.string('data/recoilfit_gjetsData_Zu1_pf_v5.root'),
         metTriggerFileName = cms.string('data/MET_trigger_eff_data_SingleMuRunBH.root'),
-        jerNameRes = cms.string('data/JER/Spring16_25nsV10_MC_PtResolution_AK4PF.txt'),#v10 is the latest                                                                            
-        jerNameSf = cms.string('data/JER/Spring16_25nsV10_MC_SF_AK4PF.txt'),#v10 is the latest
+        jerNameRes = cms.string('data/JER/Spring16_25nsV10_MC_PtResolution_AK8PF.txt'),#v10 is the latest                                                                            
+        jerNameSf = cms.string('data/JER/Spring16_25nsV10_MC_SF_AK8PF.txt'),#v10 is the latest
     ),
 
-    minGenBpt = cms.double(15.),
-    maxGenBeta = cms.double(2.4),
+    minGenBpt = cms.double(0.),
+    maxGenBeta = cms.double(99999.),
     writeNJets = cms.int32(0),
     writeNFatJets = cms.int32(0),
     writeNGenBquarks = cms.int32(4),
     writeNGenLongLiveds = cms.int32(2),
     verbose = cms.bool(False),
+    verboseTrigger  = cms.bool(False),
 )
 
 process.seq = cms.Sequence(

@@ -58,6 +58,7 @@
 #include "JetAnalyzer.h"
 #include "GenAnalyzer.h"
 #include "PileupAnalyzer.h"
+#include "TriggerAnalyzer.h"
 #include "Objects.h"
 #include "ObjectsFormat.h"
 
@@ -103,7 +104,9 @@ class RecoStudiesCalo : public edm::one::EDAnalyzer<edm::one::SharedResources>  
     edm::EDGetTokenT<reco::CaloJetCollection> caloJetToken;
     edm::ParameterSet GenPSet;
     edm::ParameterSet PileupPSet;
+    edm::ParameterSet TriggerPSet;
     edm::ParameterSet CHSJetPSet;
+    edm::ParameterSet PuppiJetPSet;
     edm::ParameterSet JetPSet;
     edm::ParameterSet CHSFatJetPSet;
     edm::ParameterSet FatJetPSet;
@@ -111,11 +114,13 @@ class RecoStudiesCalo : public edm::one::EDAnalyzer<edm::one::SharedResources>  
     //std::string JerName_res;
 
     JetAnalyzer* theCHSJetAnalyzer;
+    JetAnalyzer* thePuppiJetAnalyzer;
     JetAnalyzer* theJetAnalyzer;
     JetAnalyzer* theCHSFatJetAnalyzer;
     JetAnalyzer* theFatJetAnalyzer;
     GenAnalyzer* theGenAnalyzer;
     PileupAnalyzer* thePileupAnalyzer;
+    TriggerAnalyzer* theTriggerAnalyzer;
 
     //int WriteNElectrons, WriteNMuons, WriteNLeptons, WriteNTaus, WriteNPhotons, WriteNFatJets;
     double MinGenBpt, MaxGenBeta;
@@ -125,25 +130,34 @@ class RecoStudiesCalo : public edm::one::EDAnalyzer<edm::one::SharedResources>  
     std::vector<JetType> MatchedJets;
     std::vector<JetType> MatchedCHSJets;
     std::vector<JetType> CHSJets;
+    std::vector<JetType> MatchedPuppiJets;
+    std::vector<JetType> PuppiJets;
+    std::vector<CaloJetType> MatchedCaloJets;
     std::vector<CustomFatJetType> FatJets;
     std::vector<FatJetType> CHSFatJets;
     std::vector<GenPType> GenBquarks;
     std::vector<GenPType> GenLongLiveds;
 
+    std::map<std::string, bool> TriggerMap;
+    std::map<std::string, int> PrescalesTriggerMap;
+    std::map<std::string, bool> MetFiltersMap;
+    //bool BadPFMuonFlag, BadChCandFlag;
+    
+
     TTree* tree;
-    bool isVerbose;
+    bool isVerbose, isVerboseTrigger;
     bool isMC;
     long int EventNumber, LumiNumber, RunNumber, nPV;
     //float muon1_pt, muon1_pfIso04, electron1_pt, fatjet1_pt, jet1_pt;
     //float met_pt, met_pt_nomu_L, met_pt_nomu_T, m_ht, m_ht_nomu_L, m_ht_nomu_T, min_met_mht, min_met_mht_nomu_L, min_met_mht_nomu_T, met_phi, met_phi_nomu_L, met_phi_nomu_T;
     //bool fatjet1_isLoose, fatjet1_isTight, muon1_isLoose, muon1_isTight;
     //long int nTightMuons, nTightElectrons, nTightFatJets, nLooseMuons, nLooseElectrons, nLooseFatJets;
-  long int nLooseJets, nTightJets, nJets, nLooseCHSJets, nTightCHSJets, nCHSJets, nLooseFatJets, nTightFatJets, nFatJets, nLooseCHSFatJets, nTightCHSFatJets, nCHSFatJets, nGenBquarks, nGenLL, nMatchedJets, nMatchedCHSJets;
-    long int nJets_bFlav, nJets_bHadronFlav, nJets_bPartonFlav, nCHSJets_bFlav, nCHSJets_bHadronFlav, nCHSJets_bPartonFlav, nFatJets_bFlav, nCHSFatJets_bFlav;
+  long int nLooseJets, nTightJets, nJets, nLooseCHSJets, nTightCHSJets, nCHSJets, nLooseFatJets, nTightFatJets, nFatJets, nLooseCHSFatJets, nTightCHSFatJets, nCHSFatJets, nGenBquarks, nGenLL, nMatchedJets, nMatchedCaloJets, nMatchedCHSJets, nCaloJets, nPuppiJets, nMatchedPuppiJets;
+  long int nJets_bFlav, nJets_bHadronFlav, nJets_bPartonFlav, nCHSJets_bFlav, nCHSJets_bHadronFlav, nCHSJets_bPartonFlav, nFatJets_bFlav, nCHSFatJets_bFlav, nPuppiJets_bFlav, nPuppiJets_bHadronFlav, nPuppiJets_bPartonFlav;
     long int nJets_0bMatch, nJets_1bMatch, nJets_2bMatch, nJets_3bMatch, nJets_4bMatch;
     long int nJets_0piMatch, nJets_1piMatch, nJets_2piMatch;
     //long int nJets_match_pi1, nJets_match_pi2, nJets_match_b1, nJets_match_b2, nJets_match_b3, nJets_match_b4;
-    long int nJets_piMother, nCHSJets_piMother, number_of_b_matched_to_Jets, number_of_b_matched_to_CHSJets;
+  long int nJets_piMother, nCHSJets_piMother, nPuppiJets_piMother, number_of_b_matched_to_Jets, number_of_b_matched_to_CHSJets, number_of_b_matched_to_CaloJets, number_of_b_matched_to_PuppiJets;
     float PUWeight;
     //bool   trig_bit_pfmet110_pfmht110;
     //bool   trig_bit_pfmet120_pfmht120;
@@ -174,30 +188,30 @@ class RecoStudiesCalo : public edm::one::EDAnalyzer<edm::one::SharedResources>  
 
   //TH1F* Index_q_match;
 
-    TH1F* Matching_to_b_AK4Jets;
-    TH1F* Matching_to_b_CHSAK4Jets;
-    TH1F* Matching_to_b_AK4Jets_simplified;
-    TH1F* Matching_to_b_CHSAK4Jets_simplified;
+    //TH1F* Matching_to_b_AK4Jets;
+    //TH1F* Matching_to_b_CHSAK4Jets;
+    //TH1F* Matching_to_b_AK4Jets_simplified;
+    //TH1F* Matching_to_b_CHSAK4Jets_simplified;
 
-    TH1F* Matching_to_pi_AK4Jets;
-    TH1F* Matching_to_pi_CHSAK4Jets;
+    //TH1F* Matching_to_pi_AK4Jets;
+    //TH1F* Matching_to_pi_CHSAK4Jets;
 
-    TH1F* Matching_to_b_AK8Jets;
-    TH1F* Matching_to_b_CHSAK8Jets;
+    //TH1F* Matching_to_b_AK8Jets;
+    //TH1F* Matching_to_b_CHSAK8Jets;
   //TH1F* Matching_to_b_AK8Jets_simplified;
   //TH1F* Matching_to_b_CHSAK8Jets_simplified;
 
-    TH1F* Matching_to_pi_AK8Jets;
-    TH1F* Matching_to_pi_CHSAK8Jets;
+    //TH1F* Matching_to_pi_AK8Jets;
+    //TH1F* Matching_to_pi_CHSAK8Jets;
 
-    TH1F* Matching_to_b_AK8Jets_sj1;
-    TH1F* Matching_to_b_CHSAK8Jets_sj1;
-    TH1F* Matching_to_pi_AK8Jets_sj1;
-    TH1F* Matching_to_pi_CHSAK8Jets_sj1;
-    TH1F* Matching_to_b_AK8Jets_sj2;
-    TH1F* Matching_to_b_CHSAK8Jets_sj2;
-    TH1F* Matching_to_pi_AK8Jets_sj2;
-    TH1F* Matching_to_pi_CHSAK8Jets_sj2;
+    //TH1F* Matching_to_b_AK8Jets_sj1;
+    //TH1F* Matching_to_b_CHSAK8Jets_sj1;
+    //TH1F* Matching_to_pi_AK8Jets_sj1;
+    //TH1F* Matching_to_pi_CHSAK8Jets_sj1;
+    //TH1F* Matching_to_b_AK8Jets_sj2;
+    //TH1F* Matching_to_b_CHSAK8Jets_sj2;
+    //TH1F* Matching_to_pi_AK8Jets_sj2;
+    //TH1F* Matching_to_pi_CHSAK8Jets_sj2;
 
   //TH1F* CSV_AK4Jets_matched_to_0b;
   //TH1F* CSV_CHSAK4Jets_matched_to_0b;
@@ -248,7 +262,9 @@ class RecoStudiesCalo : public edm::one::EDAnalyzer<edm::one::SharedResources>  
 RecoStudiesCalo::RecoStudiesCalo(const edm::ParameterSet& iConfig):
     GenPSet(iConfig.getParameter<edm::ParameterSet>("genSet")),
     PileupPSet(iConfig.getParameter<edm::ParameterSet>("pileupSet")),
+    TriggerPSet(iConfig.getParameter<edm::ParameterSet>("triggerSet")),
     CHSJetPSet(iConfig.getParameter<edm::ParameterSet>("chsJetSet")),
+    PuppiJetPSet(iConfig.getParameter<edm::ParameterSet>("puppiJetSet")),
     JetPSet(iConfig.getParameter<edm::ParameterSet>("jetSet")),
     CHSFatJetPSet(iConfig.getParameter<edm::ParameterSet>("chsFatJetSet")),
     FatJetPSet(iConfig.getParameter<edm::ParameterSet>("fatJetSet")),
@@ -258,17 +274,25 @@ RecoStudiesCalo::RecoStudiesCalo(const edm::ParameterSet& iConfig):
     WriteNFatJets(iConfig.getParameter<int>("writeNFatJets")),
     WriteNGenBquarks(iConfig.getParameter<int>("writeNGenBquarks")),
     WriteNGenLongLiveds(iConfig.getParameter<int>("writeNGenLongLiveds")),
-    isVerbose(iConfig.getParameter<bool> ("verbose"))
+    isVerbose(iConfig.getParameter<bool> ("verbose")),
+    isVerboseTrigger(iConfig.getParameter<bool> ("verboseTrigger"))
 
 {
     //Initalize objects
     theCHSJetAnalyzer      = new JetAnalyzer(CHSJetPSet, consumesCollector());
+    thePuppiJetAnalyzer      = new JetAnalyzer(PuppiJetPSet, consumesCollector());
     theJetAnalyzer      = new JetAnalyzer(JetPSet, consumesCollector());
     theCHSFatJetAnalyzer      = new JetAnalyzer(CHSFatJetPSet, consumesCollector());
     theFatJetAnalyzer      = new JetAnalyzer(FatJetPSet, consumesCollector());
     theGenAnalyzer      = new GenAnalyzer(GenPSet, consumesCollector());
     thePileupAnalyzer   = new PileupAnalyzer(PileupPSet, consumesCollector());
+    theTriggerAnalyzer  = new TriggerAnalyzer(TriggerPSet, consumesCollector());
 
+    std::vector<std::string> TriggerList(TriggerPSet.getParameter<std::vector<std::string> >("paths"));
+    for(unsigned int i = 0; i < TriggerList.size(); i++) TriggerMap[ TriggerList[i] ] = false;
+    for(unsigned int i = 0; i < TriggerList.size(); i++) PrescalesTriggerMap[ TriggerList[i] ] = -1;
+    std::vector<std::string> MetFiltersList(TriggerPSet.getParameter<std::vector<std::string> >("metpaths"));
+    for(unsigned int i = 0; i < MetFiltersList.size(); i++) MetFiltersMap[ MetFiltersList[i] ] = false;
 
     //Input tags
     edm::InputTag IT_trigResults = edm::InputTag("TriggerResults::HLT");
@@ -309,18 +333,28 @@ RecoStudiesCalo::RecoStudiesCalo(const edm::ParameterSet& iConfig):
     tree -> Branch("nGenBquarks" , &nGenBquarks , "nGenBquarks/L");
     tree -> Branch("nGenLL" , &nGenLL , "nGenLL/L");
     tree -> Branch("nJets" , &nJets , "nJets/L");
+    tree -> Branch("nCaloJets" , &nCaloJets , "nCaloJets/L");
     tree -> Branch("nMatchedJets" , &nMatchedJets , "nMatchedJets/L");
+    tree -> Branch("nMatchedCaloJets" , &nMatchedCaloJets , "nMatchedCaloJets/L");
     tree -> Branch("nMatchedCHSJets" , &nMatchedCHSJets , "nMatchedCHSJets/L");
+    tree -> Branch("nMatchedPuppiJets" , &nMatchedPuppiJets , "nMatchedPuppiJets/L");
+    tree -> Branch("nPuppiJets" , &nPuppiJets , "nPuppiJets/L");
     tree -> Branch("nJets_bFlav" , &nJets_bFlav , "nJets_bFlav/L");
     tree -> Branch("nJets_bHadronFlav" , &nJets_bHadronFlav , "nJets_bHadronFlav/L");
     tree -> Branch("nJets_bPartonFlav" , &nJets_bPartonFlav , "nJets_bPartonFlav/L");
     tree -> Branch("nJets_piMother", &nJets_piMother, "nJets_piMother/L");
     tree -> Branch("number_of_b_matched_to_Jets", &number_of_b_matched_to_Jets, "number_of_b_matched_to_Jets/L");
+    tree -> Branch("number_of_b_matched_to_CaloJets", &number_of_b_matched_to_CaloJets, "number_of_b_matched_to_CaloJets/L");
     tree -> Branch("number_of_b_matched_to_CHSJets", &number_of_b_matched_to_CHSJets, "number_of_b_matched_to_CHSJets/L");
+    tree -> Branch("number_of_b_matched_to_PuppiJets", &number_of_b_matched_to_PuppiJets, "number_of_b_matched_to_PuppiJets/L");
     tree -> Branch("nCHSJets_bFlav" , &nCHSJets_bFlav , "nCHSJets_bFlav/L");
     tree -> Branch("nCHSJets_bHadronFlav" , &nCHSJets_bHadronFlav , "nCHSJets_bHadronFlav/L");
     tree -> Branch("nCHSJets_bPartonFlav" , &nCHSJets_bPartonFlav , "nCHSJets_bPartonFlav/L");
     tree -> Branch("nCHSJets_piMother", &nCHSJets_piMother, "nCHSJets_piMother/L");
+    tree -> Branch("nPuppiJets_bFlav" , &nPuppiJets_bFlav , "nPuppiJets_bFlav/L");
+    tree -> Branch("nPuppiJets_bHadronFlav" , &nPuppiJets_bHadronFlav , "nPuppiJets_bHadronFlav/L");
+    tree -> Branch("nPuppiJets_bPartonFlav" , &nPuppiJets_bPartonFlav , "nPuppiJets_bPartonFlav/L");
+    tree -> Branch("nPuppiJets_piMother", &nPuppiJets_piMother, "nPuppiJets_piMother/L");
 
     tree -> Branch("nFatJets_bFlav" , &nFatJets_bFlav , "nFatJets_bFlav/L");
     tree -> Branch("nCHSFatJets_bFlav" , &nCHSFatJets_bFlav , "nCHSFatJets_bFlav/L");
@@ -359,30 +393,42 @@ RecoStudiesCalo::RecoStudiesCalo(const edm::ParameterSet& iConfig):
     tree -> Branch("Flag_BadChCand", &flag_BadChCand, "Flag_BadChCand/B");
     tree -> Branch("Flag_BadPFMuon", &flag_BadPFMuon, "Flag_BadPFMuon/B");
 
+    // Set trigger branches
+    for(auto it = TriggerMap.begin(); it != TriggerMap.end(); it++) tree->Branch(it->first.c_str(), &(it->second), (it->first+"/O").c_str());
+    if(isVerboseTrigger)//save PS values in ntuple
+        { 
+  	    for(auto it = PrescalesTriggerMap.begin(); it != PrescalesTriggerMap.end(); it++) {
+	        tree->Branch( ("PS_" + it->first).c_str(), &(it->second), ("PS_" + it->first+"/I").c_str());
+	    }
+        }
+    for(auto it = MetFiltersMap.begin(); it != MetFiltersMap.end(); it++) tree->Branch(it->first.c_str(), &(it->second), (it->first+"/O").c_str());
+    //tree->Branch("Flag_BadPFMuon", &BadPFMuonFlag, "Flag_BadPFMuon/O");
+    //tree->Branch("Flag_BadChCand", &BadChCandFlag, "Flag_BadChCand/O");
+
     //Histograms
     //Index_q_match= fs->make<TH1F>("Index_q_match", "Index_q_match", 5,0,5);
-    Matching_to_b_AK4Jets = fs->make<TH1F>("Matching_to_b_AK4Jets", "Matching_to_b_AK4Jets", 10,0,10);
-    Matching_to_b_CHSAK4Jets = fs->make<TH1F>("Matching_to_b_CHSAK4Jets", "Matching_to_b_CHSAK4Jets", 10,0,10);
-    Matching_to_b_AK4Jets_simplified = fs->make<TH1F>("Matching_to_b_AK4Jets_simplified", "Matching_to_b_AK4Jets_simplified", 4,0,4);
-    Matching_to_b_CHSAK4Jets_simplified = fs->make<TH1F>("Matching_to_b_CHSAK4Jets_simplified", "Matching_to_b_CHSAK4Jets_simplified", 4,0,4);
-    Matching_to_pi_AK4Jets = fs->make<TH1F>("Matching_to_pi_AK4Jets", "Matching_to_pi_AK4Jets", 10,0,10);
-    Matching_to_pi_CHSAK4Jets = fs->make<TH1F>("Matching_to_pi_CHSAK4Jets", "Matching_to_pi_CHSAK4Jets", 10,0,10);
+    //Matching_to_b_AK4Jets = fs->make<TH1F>("Matching_to_b_AK4Jets", "Matching_to_b_AK4Jets", 10,0,10);
+    //Matching_to_b_CHSAK4Jets = fs->make<TH1F>("Matching_to_b_CHSAK4Jets", "Matching_to_b_CHSAK4Jets", 10,0,10);
+    //Matching_to_b_AK4Jets_simplified = fs->make<TH1F>("Matching_to_b_AK4Jets_simplified", "Matching_to_b_AK4Jets_simplified", 4,0,4);
+    //Matching_to_b_CHSAK4Jets_simplified = fs->make<TH1F>("Matching_to_b_CHSAK4Jets_simplified", "Matching_to_b_CHSAK4Jets_simplified", 4,0,4);
+    //Matching_to_pi_AK4Jets = fs->make<TH1F>("Matching_to_pi_AK4Jets", "Matching_to_pi_AK4Jets", 10,0,10);
+    //Matching_to_pi_CHSAK4Jets = fs->make<TH1F>("Matching_to_pi_CHSAK4Jets", "Matching_to_pi_CHSAK4Jets", 10,0,10);
 
-    Matching_to_b_AK8Jets = fs->make<TH1F>("Matching_to_b_AK8Jets", "Matching_to_b_AK8Jets", 10,0,10);
-    Matching_to_b_CHSAK8Jets = fs->make<TH1F>("Matching_to_b_CHSAK8Jets", "Matching_to_b_CHSAK8Jets", 10,0,10);
+    //Matching_to_b_AK8Jets = fs->make<TH1F>("Matching_to_b_AK8Jets", "Matching_to_b_AK8Jets", 10,0,10);
+    //Matching_to_b_CHSAK8Jets = fs->make<TH1F>("Matching_to_b_CHSAK8Jets", "Matching_to_b_CHSAK8Jets", 10,0,10);
     //Matching_to_b_AK8Jets_simplified = fs->make<TH1F>("Matching_to_b_AK8Jets_simplified", "Matching_to_b_AK8Jets_simplified", 4,0,4);
     //Matching_to_b_CHSAK8Jets_simplified = fs->make<TH1F>("Matching_to_b_CHSAK8Jets_simplified", "Matching_to_b_CHSAK8Jets_simplified", 4,0,4);
-    Matching_to_pi_AK8Jets = fs->make<TH1F>("Matching_to_pi_AK8Jets", "Matching_to_pi_AK8Jets", 10,0,10);
-    Matching_to_pi_CHSAK8Jets = fs->make<TH1F>("Matching_to_pi_CHSAK8Jets", "Matching_to_pi_CHSAK8Jets", 10,0,10);
+    //Matching_to_pi_AK8Jets = fs->make<TH1F>("Matching_to_pi_AK8Jets", "Matching_to_pi_AK8Jets", 10,0,10);
+    //Matching_to_pi_CHSAK8Jets = fs->make<TH1F>("Matching_to_pi_CHSAK8Jets", "Matching_to_pi_CHSAK8Jets", 10,0,10);
 
-    Matching_to_b_AK8Jets_sj1 = fs->make<TH1F>("Matching_to_b_AK8Jets_sj1", "Matching_to_b_AK8Jets_sj1", 10,0,10);
-    Matching_to_b_CHSAK8Jets_sj1 = fs->make<TH1F>("Matching_to_b_CHSAK8Jets_sj1", "Matching_to_b_CHSAK8Jets_sj1", 10,0,10);
-    Matching_to_pi_AK8Jets_sj1 = fs->make<TH1F>("Matching_to_pi_AK8Jets_sj1", "Matching_to_pi_AK8Jets_sj1", 10,0,10);
-    Matching_to_pi_CHSAK8Jets_sj1 = fs->make<TH1F>("Matching_to_pi_CHSAK8Jets_sj1", "Matching_to_pi_CHSAK8Jets_sj1", 10,0,10);
-    Matching_to_b_AK8Jets_sj2 = fs->make<TH1F>("Matching_to_b_AK8Jets_sj2", "Matching_to_b_AK8Jets_sj2", 10,0,10);
-    Matching_to_b_CHSAK8Jets_sj2 = fs->make<TH1F>("Matching_to_b_CHSAK8Jets_sj2", "Matching_to_b_CHSAK8Jets_sj2", 10,0,10);
-    Matching_to_pi_AK8Jets_sj2 = fs->make<TH1F>("Matching_to_pi_AK8Jets_sj2", "Matching_to_pi_AK8Jets_sj2", 10,0,10);
-    Matching_to_pi_CHSAK8Jets_sj2 = fs->make<TH1F>("Matching_to_pi_CHSAK8Jets_sj2", "Matching_to_pi_CHSAK8Jets_sj2", 10,0,10);
+    //Matching_to_b_AK8Jets_sj1 = fs->make<TH1F>("Matching_to_b_AK8Jets_sj1", "Matching_to_b_AK8Jets_sj1", 10,0,10);
+    //Matching_to_b_CHSAK8Jets_sj1 = fs->make<TH1F>("Matching_to_b_CHSAK8Jets_sj1", "Matching_to_b_CHSAK8Jets_sj1", 10,0,10);
+    //Matching_to_pi_AK8Jets_sj1 = fs->make<TH1F>("Matching_to_pi_AK8Jets_sj1", "Matching_to_pi_AK8Jets_sj1", 10,0,10);
+    //Matching_to_pi_CHSAK8Jets_sj1 = fs->make<TH1F>("Matching_to_pi_CHSAK8Jets_sj1", "Matching_to_pi_CHSAK8Jets_sj1", 10,0,10);
+    //Matching_to_b_AK8Jets_sj2 = fs->make<TH1F>("Matching_to_b_AK8Jets_sj2", "Matching_to_b_AK8Jets_sj2", 10,0,10);
+    //Matching_to_b_CHSAK8Jets_sj2 = fs->make<TH1F>("Matching_to_b_CHSAK8Jets_sj2", "Matching_to_b_CHSAK8Jets_sj2", 10,0,10);
+    //Matching_to_pi_AK8Jets_sj2 = fs->make<TH1F>("Matching_to_pi_AK8Jets_sj2", "Matching_to_pi_AK8Jets_sj2", 10,0,10);
+    //Matching_to_pi_CHSAK8Jets_sj2 = fs->make<TH1F>("Matching_to_pi_CHSAK8Jets_sj2", "Matching_to_pi_CHSAK8Jets_sj2", 10,0,10);
 
     //CSV_AK4Jets_matched_to_0b = fs->make<TH1F>("CSV_AK4Jets_matched_to_0b", "CSV_AK4Jets_matched_to_0b", 50,0,1);
     //CSV_CHSAK4Jets_matched_to_0b = fs->make<TH1F>("CSV_CHSAK4Jets_matched_to_0b", "CSV_CHSAK4Jets_matched_to_0b", 50,0,1);
@@ -430,11 +476,13 @@ RecoStudiesCalo::~RecoStudiesCalo()
     if(isVerbose) std::cout << "---------- ENDING  ----------" << std::endl;
 
     delete theCHSJetAnalyzer;
+    delete thePuppiJetAnalyzer;
     delete theJetAnalyzer;
     delete theCHSFatJetAnalyzer;
     delete theFatJetAnalyzer;
     delete theGenAnalyzer;
     delete thePileupAnalyzer;
+    delete theTriggerAnalyzer;
 }
 
 
@@ -454,7 +502,10 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     for(int i = 0; i < WriteNJets; i++) ObjectsFormat::ResetJetType(Jets[i]);
     for(int i = 0; i < 4; i++) ObjectsFormat::ResetJetType(MatchedJets[i]);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     for(int i = 0; i < 4; i++) ObjectsFormat::ResetJetType(MatchedCHSJets[i]);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    for(int i = 0; i < 4; i++) ObjectsFormat::ResetJetType(MatchedPuppiJets[i]);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    for(int i = 0; i < 4; i++) ObjectsFormat::ResetCaloJetType(MatchedCaloJets[i]);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     for(int i = 0; i < WriteNJets; i++) ObjectsFormat::ResetJetType(CHSJets[i]);//!!
+    for(int i = 0; i < WriteNJets; i++) ObjectsFormat::ResetJetType(PuppiJets[i]);//!!
     for(int i = 0; i < WriteNFatJets; i++) ObjectsFormat::ResetCustomFatJetType(FatJets[i]);//??
     for(int i = 0; i < WriteNFatJets; i++) ObjectsFormat::ResetFatJetType(CHSFatJets[i]);//??
     for(int i = 0; i < WriteNGenBquarks; i++) ObjectsFormat::ResetGenPType(GenBquarks[i]);
@@ -462,8 +513,8 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
     isMC = false;
     EventNumber = LumiNumber = RunNumber = nPV = 0;
-    nJets = nLooseJets = nTightJets = nCHSJets = nLooseCHSJets = nTightCHSJets = nFatJets = nLooseFatJets = nTightFatJets = nCHSFatJets = nLooseCHSFatJets = nTightCHSFatJets = nGenBquarks = nGenLL = nPV = nMatchedJets = nMatchedCHSJets = 0;
-    nJets_bFlav = nJets_bHadronFlav = nJets_bPartonFlav= nJets_piMother = nCHSJets_bFlav = nCHSJets_bHadronFlav = nCHSJets_bPartonFlav= nCHSJets_piMother = nFatJets_bFlav = nCHSFatJets_bFlav = number_of_b_matched_to_Jets = number_of_b_matched_to_CHSJets = 0;
+    nJets = nLooseJets = nTightJets = nCHSJets = nLooseCHSJets = nTightCHSJets = nFatJets = nLooseFatJets = nTightFatJets = nCHSFatJets = nLooseCHSFatJets = nTightCHSFatJets = nGenBquarks = nGenLL = nPV = nMatchedJets = nMatchedCaloJets = nMatchedCHSJets = nCaloJets = nPuppiJets = nMatchedPuppiJets =0;
+    nJets_bFlav = nJets_bHadronFlav = nJets_bPartonFlav= nJets_piMother = nCHSJets_bFlav = nCHSJets_bHadronFlav = nCHSJets_bPartonFlav= nCHSJets_piMother = nPuppiJets_bFlav = nPuppiJets_bHadronFlav = nPuppiJets_bPartonFlav= nPuppiJets_piMother = nFatJets_bFlav = nCHSFatJets_bFlav = number_of_b_matched_to_Jets = number_of_b_matched_to_CaloJets = number_of_b_matched_to_CHSJets = number_of_b_matched_to_PuppiJets = 0;
     nJets_0bMatch = nJets_1bMatch = nJets_2bMatch = nJets_3bMatch = nJets_4bMatch = 0;
     nJets_0piMatch = nJets_1piMatch = nJets_2piMatch = 0;
     //nJets_match_pi1 = nJets_match_pi2 = nJets_match_b1 = nJets_match_b2 = nJets_match_b3 = nJets_match_b4 = 0;
@@ -472,6 +523,12 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     PUWeight = 1.;
     //MinGenBpt = -1.;
     //MaxGenBeta = -9.;
+
+    // Trigger
+    theTriggerAnalyzer->FillTriggerMap(iEvent, TriggerMap, PrescalesTriggerMap, isVerboseTrigger);
+    theTriggerAnalyzer->FillMetFiltersMap(iEvent, MetFiltersMap);
+    //BadPFMuonFlag = theTriggerAnalyzer->GetBadPFMuonFlag(iEvent);
+    //BadChCandFlag = theTriggerAnalyzer->GetBadChCandFlag(iEvent);
     
     //MET filters
     edm::Handle<edm::TriggerResults> filterResults; 
@@ -801,6 +858,81 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       }
     nMatchedCHSJets = MatchedCHSJetsVect.size();
 
+    //////////PUPPI
+
+    //------------------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------
+    // AK4 Puppi Jets
+    //------------------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------
+    std::vector<pat::Jet> PuppiJetsVect = thePuppiJetAnalyzer->FillJetVector(iEvent);
+    nPuppiJets = PuppiJetsVect.size();
+    std::vector<pat::Jet> MatchedPuppiJetsVect;
+
+    for(unsigned int a = 0; a<PuppiJetsVect.size(); a++) {
+	if(fabs(PuppiJetsVect[a].hadronFlavour())==5 || fabs(PuppiJetsVect[a].partonFlavour())==5) nPuppiJets_bFlav++;
+	if(fabs(PuppiJetsVect[a].hadronFlavour())==5) nPuppiJets_bHadronFlav++;
+	if(PuppiJetsVect[a].genParton() && fabs(PuppiJetsVect[a].partonFlavour())==5) nPuppiJets_bPartonFlav++;
+	if(PuppiJetsVect[a].genParton() && abs(Utilities::FindMotherId(PuppiJetsVect[a].genParton()))==9000006) nPuppiJets_piMother++;
+        //if(PuppiJetsVect[a].hasUserInt("isLoose") && PuppiJetsVect[a].userInt("isLoose")>0) nLoosePuppiJets++;
+        //if(PuppiJetsVect[a].hasUserInt("isTight") && PuppiJetsVect[a].userInt("isTight")>0) nTightPuppiJets++;
+
+	
+	//Matching to b quarks of AK4PuppiJets
+	//Starting point: AK4 jets
+	//Only define matching for jets fulfilling all the properties
+	int n_b_matched_to_PuppiJets = 0;
+	for(unsigned int b = 0; b<GenBquarksVect.size(); b++) {
+  	    if(fabs(reco::deltaR(PuppiJetsVect[a].eta(),PuppiJetsVect[a].phi(),GenBquarksVect[b].eta(),GenBquarksVect[b].phi()))<0.4 && PuppiJetsVect[a].genParton() && (fabs(PuppiJetsVect[a].hadronFlavour())==5 || fabs(PuppiJetsVect[a].partonFlavour())==5) && abs( Utilities::FindMotherId(PuppiJetsVect[a].genParton()) )==9000006) 
+	      {
+		n_b_matched_to_PuppiJets++;
+	      }
+	}
+	PuppiJetsVect[a].addUserInt("hasMatchedBquarks",n_b_matched_to_PuppiJets);	
+    }
+
+    //Matching the b quarks to AK4 jets
+    //Starting point: b-quark
+    //Postponed after loop on jets, so that Matched jets have all the additional informations
+    int matching_index_PuppiJets;//local variable
+    float delta_R_PuppiJets;//local variable
+    float current_delta_R_PuppiJets;//local variable
+    for(unsigned int b = 0; b<GenBquarksVect.size(); b++)
+      {
+	delta_R_PuppiJets = 1000.;
+	current_delta_R_PuppiJets = 1000.;
+	matching_index_PuppiJets = -1;
+	for(unsigned int a = 0; a<PuppiJetsVect.size(); a++)
+	  {
+	    current_delta_R_PuppiJets = fabs(reco::deltaR(PuppiJetsVect[a].eta(),PuppiJetsVect[a].phi(),GenBquarksVect[b].eta(),GenBquarksVect[b].phi()));
+	    if(current_delta_R_PuppiJets<0.4 && current_delta_R_PuppiJets<delta_R_PuppiJets && PuppiJetsVect[a].genParton() && (fabs(PuppiJetsVect[a].hadronFlavour())==5 || fabs(PuppiJetsVect[a].partonFlavour())==5) && abs( Utilities::FindMotherId(PuppiJetsVect[a].genParton()) )==9000006)
+	      //this implements all the reasonable possibilities!
+	      {
+	      delta_R_PuppiJets = min(delta_R_PuppiJets,current_delta_R_PuppiJets);
+	      matching_index_PuppiJets = a;
+	      PuppiJetsVect[a].addUserInt("original_jet_index",a+1);
+	      MatchedPuppiJetsVect.push_back(PuppiJetsVect[a]);//avoid duplicates!
+	      }
+	  }
+	if(matching_index_PuppiJets>=0){
+	  number_of_b_matched_to_PuppiJets++;
+	}
+      }
+
+
+    //Remove duplicates from Matched PuppiJets Vector
+    for(unsigned int r = 0; r<MatchedPuppiJetsVect.size(); r++)
+      {
+	for(unsigned int s = 0; s<MatchedPuppiJetsVect.size(); s++)
+	  {
+	    if(r!=s && MatchedPuppiJetsVect[s].pt()==MatchedPuppiJetsVect[r].pt()) MatchedPuppiJetsVect.erase(MatchedPuppiJetsVect.begin()+s);
+	  }//duplicates removed
+      }
+    nMatchedPuppiJets = MatchedPuppiJetsVect.size();
+
+
+
+
     //------------------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------
     // Gen matcher - with AK4
@@ -811,12 +943,16 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     theJetAnalyzer->GenMatcher(JetsVect, GenBquarksVect, "q");
     theJetAnalyzer->GenMatcher(MatchedJetsVect, GenBquarksVect, "q");
     theCHSJetAnalyzer->GenMatcher(CHSJetsVect, GenBquarksVect, "q");
-    theJetAnalyzer->GenMatcher(MatchedCHSJetsVect, GenBquarksVect, "q");
+    thePuppiJetAnalyzer->GenMatcher(PuppiJetsVect, GenBquarksVect, "q");
+    theCHSJetAnalyzer->GenMatcher(MatchedCHSJetsVect, GenBquarksVect, "q");
+    thePuppiJetAnalyzer->GenMatcher(MatchedPuppiJetsVect, GenBquarksVect, "q");
     //GenLongLivedVect
     theJetAnalyzer->GenMatcher(JetsVect, GenLongLivedVect, "pi");
     theJetAnalyzer->GenMatcher(MatchedJetsVect, GenLongLivedVect, "pi");
     theCHSJetAnalyzer->GenMatcher(CHSJetsVect, GenLongLivedVect, "pi");
     theCHSJetAnalyzer->GenMatcher(MatchedCHSJetsVect, GenLongLivedVect, "pi");
+    thePuppiJetAnalyzer->GenMatcher(PuppiJetsVect, GenLongLivedVect, "pi");
+    thePuppiJetAnalyzer->GenMatcher(MatchedPuppiJetsVect, GenLongLivedVect, "pi");
 
 
     //------------------------------------------------------------------------------------------
@@ -891,9 +1027,9 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	    if(FatJetsVect[a].subjets("SoftDrop").size() > 1 && fabs(reco::deltaR(FatJetsVect[a].subjets("SoftDrop")[1]->eta(),FatJetsVect[a].subjets("SoftDrop")[1]->phi(),GenBquarksVect[b].eta(),GenBquarksVect[b].phi())) <0.4) n_b_matched_sj2++; 
 	}
 	FatJetsVect[a].addUserInt("hasMatchedBquarks",n_b_matched);
-	Matching_to_b_AK8Jets->Fill(n_b_matched);
-	Matching_to_b_AK8Jets_sj1->Fill(n_b_matched_sj1);
-	Matching_to_b_AK8Jets_sj2->Fill(n_b_matched_sj2);
+	//Matching_to_b_AK8Jets->Fill(n_b_matched);
+	//Matching_to_b_AK8Jets_sj1->Fill(n_b_matched_sj1);
+	//Matching_to_b_AK8Jets_sj2->Fill(n_b_matched_sj2);
 
 	//if(n_b_matched==0)
 	//{
@@ -932,9 +1068,9 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	    if(FatJetsVect[a].subjets("SoftDrop").size() > 1 && fabs(reco::deltaR(FatJetsVect[a].subjets("SoftDrop")[1]->eta(),FatJetsVect[a].subjets("SoftDrop")[1]->phi(),GenLongLivedVect[pi].eta(),GenLongLivedVect[pi].phi())) <0.4) n_pi_matched_sj2++; 
 	}
 	FatJetsVect[a].addUserInt("hasMatchedLL",n_pi_matched);
-	Matching_to_pi_AK8Jets->Fill(n_pi_matched);
-	Matching_to_pi_AK8Jets_sj1->Fill(n_pi_matched_sj1);
-	Matching_to_pi_AK8Jets_sj2->Fill(n_pi_matched_sj2);
+	//Matching_to_pi_AK8Jets->Fill(n_pi_matched);
+	//Matching_to_pi_AK8Jets_sj1->Fill(n_pi_matched_sj1);
+	//Matching_to_pi_AK8Jets_sj2->Fill(n_pi_matched_sj2);
 
 	//if(n_pi_matched==0)
 	//{
@@ -984,9 +1120,9 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	    if(CHSFatJetsVect[a].subjets("SoftDrop").size() > 1 && fabs(reco::deltaR(CHSFatJetsVect[a].subjets("SoftDrop")[1]->eta(),CHSFatJetsVect[a].subjets("SoftDrop")[1]->phi(),GenBquarksVect[b].eta(),GenBquarksVect[b].phi())) <0.4) n_b_matched_sj2_chs++; 
 	}
 	CHSFatJetsVect[a].addUserInt("hasMatchedBquarks",n_b_matched_chs);
-	Matching_to_b_CHSAK8Jets->Fill(n_b_matched_chs);
-	Matching_to_b_CHSAK8Jets_sj1->Fill(n_b_matched_sj1_chs);
-	Matching_to_b_CHSAK8Jets_sj2->Fill(n_b_matched_sj2_chs);
+	//Matching_to_b_CHSAK8Jets->Fill(n_b_matched_chs);
+	//Matching_to_b_CHSAK8Jets_sj1->Fill(n_b_matched_sj1_chs);
+	//Matching_to_b_CHSAK8Jets_sj2->Fill(n_b_matched_sj2_chs);
 
 	//Matching to dark pions of CHSAK8Jets
 	int n_pi_matched_chs = 0;
@@ -998,9 +1134,9 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	    if(CHSFatJetsVect[a].subjets("SoftDrop").size() > 1 && fabs(reco::deltaR(CHSFatJetsVect[a].subjets("SoftDrop")[1]->eta(),CHSFatJetsVect[a].subjets("SoftDrop")[1]->phi(),GenLongLivedVect[pi].eta(),GenLongLivedVect[pi].phi())) <0.4) n_pi_matched_sj2_chs++; 
 	}
 	CHSFatJetsVect[a].addUserInt("hasMatchedLL",n_pi_matched_chs);
-	Matching_to_pi_CHSAK8Jets->Fill(n_pi_matched_chs);
-	Matching_to_pi_CHSAK8Jets_sj1->Fill(n_pi_matched_sj1_chs);
-	Matching_to_pi_CHSAK8Jets_sj2->Fill(n_pi_matched_sj2_chs);	
+	//Matching_to_pi_CHSAK8Jets->Fill(n_pi_matched_chs);
+	//Matching_to_pi_CHSAK8Jets_sj1->Fill(n_pi_matched_sj1_chs);
+	//Matching_to_pi_CHSAK8Jets_sj2->Fill(n_pi_matched_sj2_chs);	
     }
 
     if(isVerbose)
@@ -1025,27 +1161,69 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     */
 
 
+    //------------------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------
+    // AK4 CALO Jets
+    //------------------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------
     edm::Handle<std::vector<reco::CaloJet>> caloJets;
     iEvent.getByToken( caloJetToken, caloJets );
-    std::vector<reco::CaloJet> CaloJetVect;
+    std::vector<reco::CaloJet> CaloJetsVect;
+    std::vector<reco::CaloJet> MatchedCaloJetsVect;
 
-    //    for (size_t i = 0; i < caloJets->size(); ++i) {
-    //std::cout << i << std::endl;
-    //}
 
-    
+    //Do what is done for Jet analyzer, hardcoded, without JEC:    
+    //As a first guess, let's restrict calo jet to tracker
+    float PtTh = 15.;
+    float EtaTh = 2.4;
     for(std::vector<reco::CaloJet>::const_iterator it=caloJets->begin(); it!=caloJets->end(); it++) {
-      reco::CaloJet j=*it;
-      std::cout << "calo jet filling " << std::endl;
-      std::cout << j.pt() << std::endl;
-      //if ( j.pt() < 30 ) continue;//this causes a jump at ~30? investigate!
-      //if ( fabs( j.eta() ) > 2.5 ) continue;
-      //nLooseJets++;
-      //jet1_pt = j.pt();
-      CaloJetVect.push_back(j);
+      reco::CaloJet jet=*it;
+      // Pt and eta cut
+      if(jet.pt()<PtTh || fabs(jet.eta())>EtaTh) continue;
+      CaloJetsVect.push_back(jet);
     }
     
+    nCaloJets = CaloJetsVect.size();
 
+    
+    //Matching the b quarks to AK4 calo jets
+    //Starting point: b-quark
+    int matching_index_CaloJets;//local variable
+    float delta_R_CaloJets;//local variable
+    float current_delta_R_CaloJets;//local variable
+
+    for(unsigned int b = 0; b<GenBquarksVect.size(); b++)
+      {
+	delta_R_CaloJets = 1000.;
+	current_delta_R_CaloJets = 1000.;
+	matching_index_CaloJets = -1;
+	for(unsigned int a = 0; a<CaloJetsVect.size(); a++)
+	  {
+	    current_delta_R_CaloJets = fabs(reco::deltaR(CaloJetsVect[a].eta(),CaloJetsVect[a].phi(),GenBquarksVect[b].eta(),GenBquarksVect[b].phi()));
+	    if(current_delta_R_CaloJets<0.4 && current_delta_R_CaloJets<delta_R_CaloJets)
+	      //this implements all the reasonable possibilities!
+	      {
+	      delta_R_CaloJets = min(delta_R_CaloJets,current_delta_R_CaloJets);
+	      matching_index_CaloJets = a;
+	      //JetsVect[a].addUserInt("original_jet_index",a+1);
+	      MatchedCaloJetsVect.push_back(CaloJetsVect[a]);//avoid duplicates!
+	      }
+	  }
+	if(matching_index_CaloJets>=0){
+	  number_of_b_matched_to_CaloJets++;
+	}
+      }
+
+
+    //Remove duplicates from Matched Jets Vector
+    for(unsigned int r = 0; r<MatchedCaloJetsVect.size(); r++)
+      {
+	for(unsigned int s = 0; s<MatchedCaloJetsVect.size(); s++)
+	  {
+	    if(r!=s && MatchedCaloJetsVect[s].pt()==MatchedCaloJetsVect[r].pt()) MatchedCaloJetsVect.erase(MatchedCaloJetsVect.begin()+s);
+	  }//duplicates removed
+      }
+    nMatchedCaloJets = MatchedCaloJetsVect.size();
 
     /*
     //Vertices
@@ -1076,6 +1254,8 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       for(unsigned int i = 0; i < CHSJetsVect.size(); i++) std::cout << "  CHS AK4 jet  [" << i << "]\tpt: " << CHSJetsVect[i].pt() << "\teta: " << CHSJetsVect[i].eta() << "\tphi: " << CHSJetsVect[i].phi() << "\tmass: " << CHSJetsVect[i].mass() << std::endl;
       std::cout << "number of AK4 jets:  " << JetsVect.size() << std::endl;
       for(unsigned int i = 0; i < JetsVect.size(); i++) std::cout << "  AK4 jet  [" << i << "]\tpt: " << JetsVect[i].pt() << "\teta: " << JetsVect[i].eta() << "\tphi: " << JetsVect[i].phi() << "\tmass: " << JetsVect[i].mass() << std::endl;
+      std::cout << "number of Macthed Calo AK4 jets:  " << MatchedCaloJetsVect.size() << std::endl;
+      for(unsigned int i = 0; i < MatchedCaloJetsVect.size(); i++) std::cout << "  Calo AK4 jet  [" << i << "]\tpt: " << MatchedCaloJetsVect[i].pt() << "\teta: " << MatchedCaloJetsVect[i].eta() << "\tphi: " << MatchedCaloJetsVect[i].phi() << "\tmass: " << MatchedCaloJetsVect[i].mass() << std::endl;
       //std::cout << "number of Gen B quarks:  " << GenBquarksVect.size() << std::endl;
       //for(unsigned int i = 0; i < GenBquarksVect.size(); i++) std::cout << "  Gen B quark  [" << i << "]\tpt: " << GenBquarksVect[i].pt() << "\teta: " << GenBquarksVect[i].eta() << "\tphi: " << GenBquarksVect[i].phi() << "\tmass: " << GenBquarksVect[i].mass() << std::endl;
      std::cout << "number of AK8 jets:  " << FatJetsVect.size() << std::endl;
@@ -1096,7 +1276,10 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     for(unsigned int i = 0; i < Jets.size() && i < JetsVect.size(); i++) ObjectsFormat::FillJetType(Jets[i], &JetsVect[i], isMC);
     for(unsigned int i = 0; i < MatchedJets.size() && i < MatchedJetsVect.size(); i++) ObjectsFormat::FillJetType(MatchedJets[i], &MatchedJetsVect[i], isMC);
     for(unsigned int i = 0; i < MatchedCHSJets.size() && i < MatchedCHSJetsVect.size(); i++) ObjectsFormat::FillJetType(MatchedCHSJets[i], &MatchedCHSJetsVect[i], isMC);
+    for(unsigned int i = 0; i < MatchedPuppiJets.size() && i < MatchedPuppiJetsVect.size(); i++) ObjectsFormat::FillJetType(MatchedPuppiJets[i], &MatchedPuppiJetsVect[i], isMC);
+    for(unsigned int i = 0; i < MatchedCaloJets.size() && i < MatchedCaloJetsVect.size(); i++) ObjectsFormat::FillCaloJetType(MatchedCaloJets[i], &MatchedCaloJetsVect[i], isMC);
     for(unsigned int i = 0; i < CHSJets.size() && i < CHSJetsVect.size(); i++) ObjectsFormat::FillJetType(CHSJets[i], &CHSJetsVect[i], isMC);
+    for(unsigned int i = 0; i < PuppiJets.size() && i < PuppiJetsVect.size(); i++) ObjectsFormat::FillJetType(PuppiJets[i], &PuppiJetsVect[i], isMC);
     for(unsigned int i = 0; i < FatJets.size() && i < FatJetsVect.size(); i++) ObjectsFormat::FillCustomFatJetType(FatJets[i], &FatJetsVect[i], isMC);//??
     for(unsigned int i = 0; i < CHSFatJets.size() && i < CHSFatJetsVect.size(); i++) ObjectsFormat::FillFatJetType(CHSFatJets[i], &CHSFatJetsVect[i], isMC);//??
     for(unsigned int i = 0; i < GenBquarks.size() && i < GenBquarksVect.size(); i++) ObjectsFormat::FillGenPType(GenBquarks[i], &GenBquarksVect[i]);
@@ -1117,7 +1300,10 @@ RecoStudiesCalo::beginJob()
     for(int i = 0; i < WriteNJets; i++) Jets.push_back( JetType() );
     for(int i = 0; i < 4; i++) MatchedJets.push_back( JetType() );
     for(int i = 0; i < 4; i++) MatchedCHSJets.push_back( JetType() );
+    for(int i = 0; i < 4; i++) MatchedPuppiJets.push_back( JetType() );
+    for(int i = 0; i < 4; i++) MatchedCaloJets.push_back( CaloJetType() );
     for(int i = 0; i < WriteNJets; i++) CHSJets.push_back( JetType() );
+    for(int i = 0; i < WriteNJets; i++) PuppiJets.push_back( JetType() );
     for(int i = 0; i < WriteNFatJets; i++) FatJets.push_back( CustomFatJetType() );//??
     for(int i = 0; i < WriteNFatJets; i++) CHSFatJets.push_back( FatJetType() );//??
     for(int i = 0; i < WriteNGenBquarks; i++) GenBquarks.push_back( GenPType() );
@@ -1127,7 +1313,10 @@ RecoStudiesCalo::beginJob()
     for(int i = 0; i < WriteNJets; i++) tree->Branch(("Jet"+std::to_string(i+1)).c_str(), &(Jets[i].pt), ObjectsFormat::ListJetType().c_str());
     for(int i = 0; i < 4; i++) tree->Branch(("MatchedJet"+std::to_string(i+1)).c_str(), &(MatchedJets[i].pt), ObjectsFormat::ListJetType().c_str());
     for(int i = 0; i < 4; i++) tree->Branch(("MatchedCHSJet"+std::to_string(i+1)).c_str(), &(MatchedCHSJets[i].pt), ObjectsFormat::ListJetType().c_str());
+    for(int i = 0; i < 4; i++) tree->Branch(("MatchedPuppiJet"+std::to_string(i+1)).c_str(), &(MatchedPuppiJets[i].pt), ObjectsFormat::ListJetType().c_str());
+    for(int i = 0; i < 4; i++) tree->Branch(("MatchedCaloJet"+std::to_string(i+1)).c_str(), &(MatchedCaloJets[i].pt), ObjectsFormat::ListCaloJetType().c_str());
     for(int i = 0; i < WriteNJets; i++) tree->Branch(("CHSJet"+std::to_string(i+1)).c_str(), &(CHSJets[i].pt), ObjectsFormat::ListJetType().c_str());
+    for(int i = 0; i < WriteNJets; i++) tree->Branch(("PuppiJet"+std::to_string(i+1)).c_str(), &(PuppiJets[i].pt), ObjectsFormat::ListJetType().c_str());
     for(int i = 0; i < WriteNFatJets; i++) tree->Branch(("FatJet"+std::to_string(i+1)).c_str(), &(FatJets[i].pt), ObjectsFormat::ListCustomFatJetType().c_str());//??
     for(int i = 0; i < WriteNFatJets; i++) tree->Branch(("CHSFatJet"+std::to_string(i+1)).c_str(), &(CHSFatJets[i].pt), ObjectsFormat::ListFatJetType().c_str());//??
     for(int i = 0; i < WriteNGenBquarks; i++) tree->Branch(("GenBquark"+std::to_string(i+1)).c_str(), &(GenBquarks[i].pt), ObjectsFormat::ListGenPType().c_str());
