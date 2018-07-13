@@ -152,6 +152,32 @@ std::vector<reco::GenParticle> GenAnalyzer::FillGenVectorByIdAndStatus(const edm
     return Vect;
 }
 
+std::vector<reco::GenParticle> GenAnalyzer::FillGenVectorByIdListAndStatusAndMotherList(const edm::Event& iEvent, std::vector<int> partidlist, int partstatus, std::vector<int> motheridlist) {
+
+    std::vector<reco::GenParticle> Vect;
+
+    // check if is real data
+    isRealData = iEvent.isRealData();
+    if(isRealData or PythiaLOSample) return Vect;
+    // fill collection for this event 
+    iEvent.getByToken(GenParticlesToken, GenCollection);
+    // Loop on Gen Particles collection
+    for(std::vector<reco::GenParticle>::const_iterator it = GenCollection->begin(); it != GenCollection->end(); ++it) {
+
+      for(unsigned int s = 0; s < partidlist.size(); s++) {
+
+	for(unsigned int m = 0; m < motheridlist.size(); m++) {
+
+	    if(abs(it->pdgId()) == s && (it->status()) == partstatus && abs(it->mother()->pdgId()) == m) Vect.push_back(*it); // Fill vector
+
+	}
+
+      }
+    }
+//    std::cout << "\n\n\n" << std::endl;
+    return Vect;
+}
+
 std::vector<reco::GenParticle> GenAnalyzer::FillGenVectorByIdStatusAndMother(const edm::Event& iEvent, int partid, int partstatus, int motherid) {
 
     std::vector<reco::GenParticle> Vect;
