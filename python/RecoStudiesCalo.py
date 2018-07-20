@@ -8,32 +8,31 @@ process = cms.Process("USER")
 
 
 ## Events to process
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(14900) ) #14900
 
 ## Input files
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        #'/store/relval/CMSSW_7_4_1/RelValTTbar_13/MINIAODSIM/PU50ns_MCRUN2_74_V8_gensim_740pre7-v1/00000/7EC72BA9-44EC-E411-9DF3-0025905A60B0.root'
-        #'/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-1_Summer16_MINIAOD/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-1_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_standard_mixing-Moriond17_80X_mcRun2_2016_MINIAOD/180201_104029/0000/miniaod_VBFH_SS_m40_ctau1_1.root'
-        #'/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/80000/FED04F50-A3BE-E611-A893-0025900E3502.root'
-        #'file:VBFHToSS_m60_miniaod.root'
-        #'/store/user/lbenato/recluster_ak4Jets_miniaod_29May2018/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/recluster_ak4Jets_miniaod_29May2018/180529_123139/0000/test_ttbar_1.root'
-#        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_Summer16_MINIAODSIM_24May2018/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_24May2018/180529_093853/0000/miniaod_1.root',
-#        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_Summer16_MINIAODSIM_24May2018/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_24May2018/180529_093853/0000/miniaod_2.root',
-#        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_Summer16_MINIAODSIM_24May2018/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_24May2018/180529_093853/0000/miniaod_3.root',
-#        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_Summer16_MINIAODSIM_24May2018/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_24May2018/180529_093853/0000/miniaod_4.root',
-#        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_Summer16_MINIAODSIM_24May2018/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_24May2018/180529_093853/0000/miniaod_5.root',
-#        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_Summer16_MINIAODSIM_24May2018/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_24May2018/180529_093853/0000/miniaod_6.root',
-#        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_Summer16_MINIAODSIM_24May2018/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_24May2018/180529_093853/0000/miniaod_7.root',
-#        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_Summer16_MINIAODSIM_24May2018/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_24May2018/180529_093853/0000/miniaod_8.root',
-#        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_Summer16_MINIAODSIM_24May2018/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_24May2018/180529_093853/0000/miniaod_9.root',
-#        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_Summer16_MINIAODSIM_24May2018/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_24May2018/180529_093853/0000/miniaod_10.root',
-#        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_Summer16_MINIAODSIM_24May2018/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_24May2018/180529_093853/0000/miniaod_11.root',
-#        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_Summer16_MINIAODSIM_24May2018/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_24May2018/180529_093853/0000/miniaod_12.root',
-#        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_Summer16_MINIAODSIM_24May2018/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_24May2018/180529_093853/0000/miniaod_13.root',
-#        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_Summer16_MINIAODSIM_24May2018/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_24May2018/180529_093853/0000/miniaod_14.root',
-#        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_Summer16_MINIAODSIM_24May2018/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_24May2018/180529_093853/0000/miniaod_15.root',
-        'file:/nfs/dust/cms/user/lbenato/calo_jets/miniaod_calo.root'
+        
+        #'file:/nfs/dust/cms/user/lbenato/calo_jets/miniaod_calo.root'
+        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_1.root',
+        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_2.root',
+        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_3.root',
+        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_4.root',
+        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_5.root',
+        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_6.root',
+        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_7.root',
+        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_8.root',
+        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_9.root',
+        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_10.root',
+        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_11.root',
+        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_12.root',
+        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_13.root',
+        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_14.root',
+        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_15.root'
+
+
+
     )
 )
 
@@ -55,7 +54,7 @@ elif not(isData):
 process.GlobalTag = GlobalTag (process.GlobalTag, GT)
 
 process.TFileService = cms.Service( "TFileService",
-    fileName = cms.string('output_calo.root'),# if len(options.outputFile)==0 else options.outputFile),
+    fileName = cms.string('op_calo_t1.root'),# if len(options.outputFile)==0 else options.outputFile),
     closeFileFast = cms.untracked.bool(True),
 )
 
@@ -910,7 +909,7 @@ process.seq = cms.Sequence(
 #    process.ak4GenJetsNoNu *
 #    process.ak8GenJetsNoNu *
     process.ak4PFJets *
-    process.ak8PFJets *
+#    process.ak8PFJets *
 #    process.ak8PFJetsPruned *
 #    process.ak8PFJetsSoftDrop *
 #    process.puppi *
@@ -928,7 +927,7 @@ process.seq = cms.Sequence(
 #    process.patJetsAK8PFPuppiSoftDropSubjets *
 #    process.patJetsAK8PFSoftDropPacked *
 #    process.patJetsAK8PFPuppiSoftDropPacked *
-    process.packedPatJetsAK8 *
+#    process.packedPatJetsAK8 *
 ##unscheduled:
     process.BadPFMuonFilter *
     process.BadChargedCandidateFilter *

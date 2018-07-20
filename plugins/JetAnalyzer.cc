@@ -174,7 +174,7 @@ JetAnalyzer::~JetAnalyzer() {
     if(RecalibratePuppiMass) PuppiCorrFile->Close();
 
     if(UseReshape) {
-	delete calib;
+	//delete calibggerAnalyzer;  //<------------brian
     }
     delete jecUncMC;
     delete jecUncDATA;

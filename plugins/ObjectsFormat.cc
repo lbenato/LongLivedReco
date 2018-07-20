@@ -1,6 +1,9 @@
 
 #include "ObjectsFormat.h"
 
+//added by brian
+#include <vector>
+
 //*******************//
 //  Leptons (e+mu)   //
 //*******************//
@@ -225,7 +228,313 @@ std::string ObjectsFormat::ListTauType() {return "pt/F:eta/F:phi/F:mass/F:energy
 
 void ObjectsFormat::FillJetType(JetType& I, const pat::Jet* R, bool isMC) {
     if(!R) return;
+  
     I.pt          = R->pt();
+  
+    using namespace std;
+    const unsigned int & nods  = R->numberOfDaughters(); 
+    unsigned int * max_n                = new unsigned int;
+    float * max_pt             = new float;
+    unsigned int n_pfc = 40;
+    std::vector<float> * ptVect        = new std::vector<float>; 
+    std::vector<unsigned int> * leading_pfcVect = new std::vector<unsigned int>;       
+    std::vector<float> * pxVect          = new std::vector<float>;
+    std::vector<float> * pyVect          = new std::vector<float>;
+    std::vector<float> * pzVect          = new std::vector<float>;
+    std::vector<float> * energyVect      = new std::vector<float>;
+    std::vector<float>   * ifTrackVect   = new std::vector<float>;    
+    
+    for(unsigned int i = 0; i < nods; i++)
+      {
+        ptVect->push_back(   ((R->getJetConstituentsQuick())[i])->pt()   );  
+        cout << (*ptVect)[i] << endl;
+      }
+    cout << "====================================================================" << endl;
+    if (n_pfc > nods) n_pfc = nods;    
+
+    for(unsigned int j = 0; j < n_pfc; j++)
+      {
+        *max_n     = 0;
+        *max_pt    = -1;
+        for(unsigned int i = 0; i < nods; i++)
+          {
+            //----check if coincide with previous index
+            bool bool_last_max = true;
+            for(unsigned int k = 0; k < leading_pfcVect->size(); k++)
+              {
+                if(  (*leading_pfcVect)[k] == i  ) bool_last_max = false;
+              }
+            //----check if coincide with previous index
+            if(  ( *max_pt <= (*ptVect)[i] ) && ( bool_last_max )  ) 
+              {  
+                *max_n  = i; 
+                *max_pt = (*ptVect)[i];
+              }
+          }
+        leading_pfcVect->push_back( *max_n );
+      }
+       
+    if (n_pfc > leading_pfcVect->size()) n_pfc = leading_pfcVect->size();  
+    for(unsigned int j = 0; j < n_pfc; j++)
+      {
+        cout << (*leading_pfcVect)[j] << endl;
+        ///////////////////
+        pxVect->push_back( ((R->getJetConstituentsQuick())[(*leading_pfcVect)[j]])->px() );    
+        pyVect->push_back( ((R->getJetConstituentsQuick())[(*leading_pfcVect)[j]])->py() );
+        pzVect->push_back( ((R->getJetConstituentsQuick())[(*leading_pfcVect)[j]])->pz() );
+        energyVect->push_back( ((R->getJetConstituentsQuick())[(*leading_pfcVect)[j]])->energy() );
+        if(   ((R->getJetConstituentsQuick())[(*leading_pfcVect)[j]])->charge() == 0   ) ifTrackVect->push_back( 0 );
+        else ifTrackVect->push_back( 1 );
+      }
+
+    for(unsigned int j = 0; j < 40; j++)
+      {
+        if(pxVect->size() != 40)
+          {
+            pxVect->push_back( 0. );
+            pyVect->push_back( 0. );
+            pzVect->push_back( 0. );
+            energyVect->push_back( 0. );
+            ifTrackVect->push_back( -1 );
+          }
+      }  
+    cout << "--------------------------------------------------------------------" << endl;
+    cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+    for(unsigned int i = 0; i < 40; i++)
+      {
+        cout << (*pxVect)[i] << endl;
+        cout << (*energyVect)[i] << endl;
+        cout << (*ifTrackVect)[i] << endl;      
+      }
+    cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+
+
+         I.pfc1_px       = (*pxVect)[0];
+         I.pfc1_py       = (*pyVect)[0];
+         I.pfc1_pz       = (*pzVect)[0];
+         I.pfc1_energy   = (*energyVect)[0];
+         I.pfc1_ifTrack  = (*ifTrackVect)[0];
+         I.pfc2_px       = (*pxVect)[1];
+         I.pfc2_py       = (*pyVect)[1];
+         I.pfc2_pz       = (*pzVect)[1];
+         I.pfc2_energy   = (*energyVect)[1];
+         I.pfc2_ifTrack  = (*ifTrackVect)[1];
+         I.pfc3_px       = (*pxVect)[2];
+         I.pfc3_py       = (*pyVect)[2];
+         I.pfc3_pz       = (*pzVect)[2];
+         I.pfc3_energy   = (*energyVect)[2];
+         I.pfc3_ifTrack  = (*ifTrackVect)[2];
+         I.pfc4_px       = (*pxVect)[3];
+         I.pfc4_py       = (*pyVect)[3];
+         I.pfc4_pz       = (*pzVect)[3];
+         I.pfc4_energy   = (*energyVect)[3];
+         I.pfc4_ifTrack  = (*ifTrackVect)[3];
+         I.pfc5_px       = (*pxVect)[4];
+         I.pfc5_py       = (*pyVect)[4];
+         I.pfc5_pz       = (*pzVect)[4];
+         I.pfc5_energy   = (*energyVect)[4];
+         I.pfc5_ifTrack  = (*ifTrackVect)[4];
+         I.pfc6_px       = (*pxVect)[5];
+         I.pfc6_py       = (*pyVect)[5];
+         I.pfc6_pz       = (*pzVect)[5];
+         I.pfc6_energy   = (*energyVect)[5];
+         I.pfc6_ifTrack  = (*ifTrackVect)[5];
+         I.pfc7_px       = (*pxVect)[6];
+         I.pfc7_py       = (*pyVect)[6];
+         I.pfc7_pz       = (*pzVect)[6];
+         I.pfc7_energy   = (*energyVect)[6];
+         I.pfc7_ifTrack  = (*ifTrackVect)[6];
+         I.pfc8_px       = (*pxVect)[7];
+         I.pfc8_py       = (*pyVect)[7];
+         I.pfc8_pz       = (*pzVect)[7];
+         I.pfc8_energy   = (*energyVect)[7];
+         I.pfc8_ifTrack  = (*ifTrackVect)[7];
+         I.pfc9_px       = (*pxVect)[8];
+         I.pfc9_py       = (*pyVect)[8];
+         I.pfc9_pz       = (*pzVect)[8];
+         I.pfc9_energy   = (*energyVect)[8];
+         I.pfc9_ifTrack  = (*ifTrackVect)[8];
+         I.pfc10_px       = (*pxVect)[9];
+         I.pfc10_py       = (*pyVect)[9];
+         I.pfc10_pz       = (*pzVect)[9];
+         I.pfc10_energy   = (*energyVect)[9];
+         I.pfc10_ifTrack  = (*ifTrackVect)[9];
+         I.pfc11_px       = (*pxVect)[10];
+         I.pfc11_py       = (*pyVect)[10];
+         I.pfc11_pz       = (*pzVect)[10];
+         I.pfc11_energy   = (*energyVect)[10];
+         I.pfc11_ifTrack  = (*ifTrackVect)[10];
+         I.pfc12_px       = (*pxVect)[11];
+         I.pfc12_py       = (*pyVect)[11];
+         I.pfc12_pz       = (*pzVect)[11];
+         I.pfc12_energy   = (*energyVect)[11];
+         I.pfc12_ifTrack  = (*ifTrackVect)[11];
+         I.pfc13_px       = (*pxVect)[12];
+         I.pfc13_py       = (*pyVect)[12];
+         I.pfc13_pz       = (*pzVect)[12];
+         I.pfc13_energy   = (*energyVect)[12];
+         I.pfc13_ifTrack  = (*ifTrackVect)[12];
+         I.pfc14_px       = (*pxVect)[13];
+         I.pfc14_py       = (*pyVect)[13];
+         I.pfc14_pz       = (*pzVect)[13];
+         I.pfc14_energy   = (*energyVect)[13];
+         I.pfc14_ifTrack  = (*ifTrackVect)[13];
+         I.pfc15_px       = (*pxVect)[14];
+         I.pfc15_py       = (*pyVect)[14];
+         I.pfc15_pz       = (*pzVect)[14];
+         I.pfc15_energy   = (*energyVect)[14];
+         I.pfc15_ifTrack  = (*ifTrackVect)[14];
+         I.pfc16_px       = (*pxVect)[15];
+         I.pfc16_py       = (*pyVect)[15];
+         I.pfc16_pz       = (*pzVect)[15];
+         I.pfc16_energy   = (*energyVect)[15];
+         I.pfc16_ifTrack  = (*ifTrackVect)[15];
+         I.pfc17_px       = (*pxVect)[16];
+         I.pfc17_py       = (*pyVect)[16];
+         I.pfc17_pz       = (*pzVect)[16];
+         I.pfc17_energy   = (*energyVect)[16];
+         I.pfc17_ifTrack  = (*ifTrackVect)[16];
+         I.pfc18_px       = (*pxVect)[17];
+         I.pfc18_py       = (*pyVect)[17];
+         I.pfc18_pz       = (*pzVect)[17];
+         I.pfc18_energy   = (*energyVect)[17];
+         I.pfc18_ifTrack  = (*ifTrackVect)[17];
+         I.pfc19_px       = (*pxVect)[18];
+         I.pfc19_py       = (*pyVect)[18];
+         I.pfc19_pz       = (*pzVect)[18];
+         I.pfc19_energy   = (*energyVect)[18];
+         I.pfc19_ifTrack  = (*ifTrackVect)[18];
+         I.pfc20_px       = (*pxVect)[19];
+         I.pfc20_py       = (*pyVect)[19];
+         I.pfc20_pz       = (*pzVect)[19];
+         I.pfc20_energy   = (*energyVect)[19];
+         I.pfc20_ifTrack  = (*ifTrackVect)[19];
+         I.pfc21_px       = (*pxVect)[20];
+         I.pfc21_py       = (*pyVect)[20];
+         I.pfc21_pz       = (*pzVect)[20];
+         I.pfc21_energy   = (*energyVect)[20];
+         I.pfc21_ifTrack  = (*ifTrackVect)[20];
+         I.pfc22_px       = (*pxVect)[21];
+         I.pfc22_py       = (*pyVect)[21];
+         I.pfc22_pz       = (*pzVect)[21];
+         I.pfc22_energy   = (*energyVect)[21];
+         I.pfc22_ifTrack  = (*ifTrackVect)[21];
+         I.pfc23_px       = (*pxVect)[22];
+         I.pfc23_py       = (*pyVect)[22];
+         I.pfc23_pz       = (*pzVect)[22];
+         I.pfc23_energy   = (*energyVect)[22];
+         I.pfc23_ifTrack  = (*ifTrackVect)[22];
+         I.pfc24_px       = (*pxVect)[23];
+         I.pfc24_py       = (*pyVect)[23];
+         I.pfc24_pz       = (*pzVect)[23];
+         I.pfc24_energy   = (*energyVect)[23];
+         I.pfc24_ifTrack  = (*ifTrackVect)[23];
+         I.pfc25_px       = (*pxVect)[24];
+         I.pfc25_py       = (*pyVect)[24];
+         I.pfc25_pz       = (*pzVect)[24];
+         I.pfc25_energy   = (*energyVect)[24];
+         I.pfc25_ifTrack  = (*ifTrackVect)[24];
+         I.pfc26_px       = (*pxVect)[25];
+         I.pfc26_py       = (*pyVect)[25];
+         I.pfc26_pz       = (*pzVect)[25];
+         I.pfc26_energy   = (*energyVect)[25];
+         I.pfc26_ifTrack  = (*ifTrackVect)[25];
+         I.pfc27_px       = (*pxVect)[26];
+         I.pfc27_py       = (*pyVect)[26];
+         I.pfc27_pz       = (*pzVect)[26];
+         I.pfc27_energy   = (*energyVect)[26];
+         I.pfc27_ifTrack  = (*ifTrackVect)[26];
+         I.pfc28_px       = (*pxVect)[27];
+         I.pfc28_py       = (*pyVect)[27];
+         I.pfc28_pz       = (*pzVect)[27];
+         I.pfc28_energy   = (*energyVect)[27];
+         I.pfc28_ifTrack  = (*ifTrackVect)[27];
+         I.pfc29_px       = (*pxVect)[28];
+         I.pfc29_py       = (*pyVect)[28];
+         I.pfc29_pz       = (*pzVect)[28];
+         I.pfc29_energy   = (*energyVect)[28];
+         I.pfc29_ifTrack  = (*ifTrackVect)[28];
+         I.pfc30_px       = (*pxVect)[29];
+         I.pfc30_py       = (*pyVect)[29];
+         I.pfc30_pz       = (*pzVect)[29];
+         I.pfc30_energy   = (*energyVect)[29];
+         I.pfc30_ifTrack  = (*ifTrackVect)[29];
+         I.pfc31_px       = (*pxVect)[30];
+         I.pfc31_py       = (*pyVect)[30];
+         I.pfc31_pz       = (*pzVect)[30];
+         I.pfc31_energy   = (*energyVect)[30];
+         I.pfc31_ifTrack  = (*ifTrackVect)[30];
+         I.pfc32_px       = (*pxVect)[31];
+         I.pfc32_py       = (*pyVect)[31];
+         I.pfc32_pz       = (*pzVect)[31];
+         I.pfc32_energy   = (*energyVect)[31];
+         I.pfc32_ifTrack  = (*ifTrackVect)[31];
+         I.pfc33_px       = (*pxVect)[32];
+         I.pfc33_py       = (*pyVect)[32];
+         I.pfc33_pz       = (*pzVect)[32];
+         I.pfc33_energy   = (*energyVect)[32];
+         I.pfc33_ifTrack  = (*ifTrackVect)[32];
+         I.pfc34_px       = (*pxVect)[33];
+         I.pfc34_py       = (*pyVect)[33];
+         I.pfc34_pz       = (*pzVect)[33];
+         I.pfc34_energy   = (*energyVect)[33];
+         I.pfc34_ifTrack  = (*ifTrackVect)[33];
+         I.pfc35_px       = (*pxVect)[34];
+         I.pfc35_py       = (*pyVect)[34];
+         I.pfc35_pz       = (*pzVect)[34];
+         I.pfc35_energy   = (*energyVect)[34];
+         I.pfc35_ifTrack  = (*ifTrackVect)[34];
+         I.pfc36_px       = (*pxVect)[35];
+         I.pfc36_py       = (*pyVect)[35];
+         I.pfc36_pz       = (*pzVect)[35];
+         I.pfc36_energy   = (*energyVect)[35];
+         I.pfc36_ifTrack  = (*ifTrackVect)[35];
+         I.pfc37_px       = (*pxVect)[36];
+         I.pfc37_py       = (*pyVect)[36];
+         I.pfc37_pz       = (*pzVect)[36];
+         I.pfc37_energy   = (*energyVect)[36];
+         I.pfc37_ifTrack  = (*ifTrackVect)[36];
+         I.pfc38_px       = (*pxVect)[37];
+         I.pfc38_py       = (*pyVect)[37];
+         I.pfc38_pz       = (*pzVect)[37];
+         I.pfc38_energy   = (*energyVect)[37];
+         I.pfc38_ifTrack  = (*ifTrackVect)[37];
+         I.pfc39_px       = (*pxVect)[38];
+         I.pfc39_py       = (*pyVect)[38];
+         I.pfc39_pz       = (*pzVect)[38];
+         I.pfc39_energy   = (*energyVect)[38];
+         I.pfc39_ifTrack  = (*ifTrackVect)[38];
+         I.pfc40_px       = (*pxVect)[39];
+         I.pfc40_py       = (*pyVect)[39];
+         I.pfc40_pz       = (*pzVect)[39];
+         I.pfc40_energy   = (*energyVect)[39];
+         I.pfc40_ifTrack  = (*ifTrackVect)[39];
+
+
+
+
+
+
+
+
+    delete max_pt;
+    delete max_n;
+    delete ptVect;
+    delete leading_pfcVect; 
+    delete pxVect;
+    delete pyVect;
+    delete pzVect;
+    delete energyVect;
+    delete ifTrackVect;
+
+    
+    //I.pf_Id       = ((R->getJetConstituentsQuick())[nods-1])->pdgId();
+    //I.pf_energy   = ((R->getJetConstituentsQuick())[nods-1])->energy();
+
+
+    //I.pt          = R->pt();
+
+    /*
     I.eta         = R->eta();
     I.phi         = R->phi();
     I.mass        = R->mass();
@@ -317,12 +626,228 @@ void ObjectsFormat::FillJetType(JetType& I, const pat::Jet* R, bool isMC) {
     I.matchBquark = R->hasUserInt("hasMatchedBquarks") ? R->userInt("hasMatchedBquarks") : -1;
     I.matchLL     = R->hasUserInt("hasMatchedLL") ? R->userInt("hasMatchedLL") : -1;
     I.original_jet_index     = R->hasUserInt("original_jet_index") ? R->userInt("original_jet_index") : -1;
+    */
 
-    I.numOfDaughters         = R->nConstituents();
+    //I.numOfDaughters         = R->numberOfDaughters();
 }
 
 void ObjectsFormat::ResetJetType(JetType& I) {
+    //I.pf_Id       = 0;
+    //I.pf_energy   = -1.; 
+
     I.pt          = -1.;
+    //I.pf_Id       = 0;
+    //I.pf_energy   = -1.;
+
+
+
+
+         I.pfc1_px       = 0;
+         I.pfc1_py       = 0;
+         I.pfc1_pz       = 0;
+         I.pfc1_energy   = 0;
+         I.pfc1_ifTrack  = -1.;
+         I.pfc2_px       = 0;
+         I.pfc2_py       = 0;
+         I.pfc2_pz       = 0;
+         I.pfc2_energy   = 0;
+         I.pfc2_ifTrack  = -1.;
+         I.pfc3_px       = 0;
+         I.pfc3_py       = 0;
+         I.pfc3_pz       = 0;
+         I.pfc3_energy   = 0;
+         I.pfc3_ifTrack  = -1.;
+         I.pfc4_px       = 0;
+         I.pfc4_py       = 0;
+         I.pfc4_pz       = 0;
+         I.pfc4_energy   = 0;
+         I.pfc4_ifTrack  = -1.;
+         I.pfc5_px       = 0;
+         I.pfc5_py       = 0;
+         I.pfc5_pz       = 0;
+         I.pfc5_energy   = 0;
+         I.pfc5_ifTrack  = -1.;
+         I.pfc6_px       = 0;
+         I.pfc6_py       = 0;
+         I.pfc6_pz       = 0;
+         I.pfc6_energy   = 0;
+         I.pfc6_ifTrack  = -1.;
+         I.pfc7_px       = 0;
+         I.pfc7_py       = 0;
+         I.pfc7_pz       = 0;
+         I.pfc7_energy   = 0;
+         I.pfc7_ifTrack  = -1.;
+         I.pfc8_px       = 0;
+         I.pfc8_py       = 0;
+         I.pfc8_pz       = 0;
+         I.pfc8_energy   = 0;
+         I.pfc8_ifTrack  = -1.;
+         I.pfc9_px       = 0;
+         I.pfc9_py       = 0;
+         I.pfc9_pz       = 0;
+         I.pfc9_energy   = 0;
+         I.pfc9_ifTrack  = -1.;
+         I.pfc10_px       = 0;
+         I.pfc10_py       = 0;
+         I.pfc10_pz       = 0;
+         I.pfc10_energy   = 0;
+         I.pfc10_ifTrack  = -1.;
+         I.pfc11_px       = 0;
+         I.pfc11_py       = 0;
+         I.pfc11_pz       = 0;
+         I.pfc11_energy   = 0;
+         I.pfc11_ifTrack  = -1.;
+         I.pfc12_px       = 0;
+         I.pfc12_py       = 0;
+         I.pfc12_pz       = 0;
+         I.pfc12_energy   = 0;
+         I.pfc12_ifTrack  = -1.;
+         I.pfc13_px       = 0;
+         I.pfc13_py       = 0;
+         I.pfc13_pz       = 0;
+         I.pfc13_energy   = 0;
+         I.pfc13_ifTrack  = -1.;
+         I.pfc14_px       = 0;
+         I.pfc14_py       = 0;
+         I.pfc14_pz       = 0;
+         I.pfc14_energy   = 0;
+         I.pfc14_ifTrack  = -1.;
+         I.pfc15_px       = 0;
+         I.pfc15_py       = 0;
+         I.pfc15_pz       = 0;
+         I.pfc15_energy   = 0;
+         I.pfc15_ifTrack  = -1.;
+         I.pfc16_px       = 0;
+         I.pfc16_py       = 0;
+         I.pfc16_pz       = 0;
+         I.pfc16_energy   = 0;
+         I.pfc16_ifTrack  = -1.;
+         I.pfc17_px       = 0;
+         I.pfc17_py       = 0;
+         I.pfc17_pz       = 0;
+         I.pfc17_energy   = 0;
+         I.pfc17_ifTrack  = -1.;
+         I.pfc18_px       = 0;
+         I.pfc18_py       = 0;
+         I.pfc18_pz       = 0;
+         I.pfc18_energy   = 0;
+         I.pfc18_ifTrack  = -1.;
+         I.pfc19_px       = 0;
+         I.pfc19_py       = 0;
+         I.pfc19_pz       = 0;
+         I.pfc19_energy   = 0;
+         I.pfc19_ifTrack  = -1.;
+         I.pfc20_px       = 0;
+         I.pfc20_py       = 0;
+         I.pfc20_pz       = 0;
+         I.pfc20_energy   = 0;
+         I.pfc20_ifTrack  = -1.;
+         I.pfc21_px       = 0;
+         I.pfc21_py       = 0;
+         I.pfc21_pz       = 0;
+         I.pfc21_energy   = 0;
+         I.pfc21_ifTrack  = -1.;
+         I.pfc22_px       = 0;
+         I.pfc22_py       = 0;
+         I.pfc22_pz       = 0;
+         I.pfc22_energy   = 0;
+         I.pfc22_ifTrack  = -1.;
+         I.pfc23_px       = 0;
+         I.pfc23_py       = 0;
+         I.pfc23_pz       = 0;
+         I.pfc23_energy   = 0;
+         I.pfc23_ifTrack  = -1.;
+         I.pfc24_px       = 0;
+         I.pfc24_py       = 0;
+         I.pfc24_pz       = 0;
+         I.pfc24_energy   = 0;
+         I.pfc24_ifTrack  = -1.;
+         I.pfc25_px       = 0;
+         I.pfc25_py       = 0;
+         I.pfc25_pz       = 0;
+         I.pfc25_energy   = 0;
+         I.pfc25_ifTrack  = -1.;
+         I.pfc26_px       = 0;
+         I.pfc26_py       = 0;
+         I.pfc26_pz       = 0;
+         I.pfc26_energy   = 0;
+         I.pfc26_ifTrack  = -1.;
+         I.pfc27_px       = 0;
+         I.pfc27_py       = 0;
+         I.pfc27_pz       = 0;
+         I.pfc27_energy   = 0;
+         I.pfc27_ifTrack  = -1.;
+         I.pfc28_px       = 0;
+         I.pfc28_py       = 0;
+         I.pfc28_pz       = 0;
+         I.pfc28_energy   = 0;
+         I.pfc28_ifTrack  = -1.;
+         I.pfc29_px       = 0;
+         I.pfc29_py       = 0;
+         I.pfc29_pz       = 0;
+         I.pfc29_energy   = 0;
+         I.pfc29_ifTrack  = -1.;
+         I.pfc30_px       = 0;
+         I.pfc30_py       = 0;
+         I.pfc30_pz       = 0;
+         I.pfc30_energy   = 0;
+         I.pfc30_ifTrack  = -1.;
+         I.pfc31_px       = 0;
+         I.pfc31_py       = 0;
+         I.pfc31_pz       = 0;
+         I.pfc31_energy   = 0;
+         I.pfc31_ifTrack  = -1.;
+         I.pfc32_px       = 0;
+         I.pfc32_py       = 0;
+         I.pfc32_pz       = 0;
+         I.pfc32_energy   = 0;
+         I.pfc32_ifTrack  = -1.;
+         I.pfc33_px       = 0;
+         I.pfc33_py       = 0;
+         I.pfc33_pz       = 0;
+         I.pfc33_energy   = 0;
+         I.pfc33_ifTrack  = -1.;
+         I.pfc34_px       = 0;
+         I.pfc34_py       = 0;
+         I.pfc34_pz       = 0;
+         I.pfc34_energy   = 0;
+         I.pfc34_ifTrack  = -1.;
+         I.pfc35_px       = 0;
+         I.pfc35_py       = 0;
+         I.pfc35_pz       = 0;
+         I.pfc35_energy   = 0;
+         I.pfc35_ifTrack  = -1.;
+         I.pfc36_px       = 0;
+         I.pfc36_py       = 0;
+         I.pfc36_pz       = 0;
+         I.pfc36_energy   = 0;
+         I.pfc36_ifTrack  = -1.;
+         I.pfc37_px       = 0;
+         I.pfc37_py       = 0;
+         I.pfc37_pz       = 0;
+         I.pfc37_energy   = 0;
+         I.pfc37_ifTrack  = -1.;
+         I.pfc38_px       = 0;
+         I.pfc38_py       = 0;
+         I.pfc38_pz       = 0;
+         I.pfc38_energy   = 0;
+         I.pfc38_ifTrack  = -1.;
+         I.pfc39_px       = 0;
+         I.pfc39_py       = 0;
+         I.pfc39_pz       = 0;
+         I.pfc39_energy   = 0;
+         I.pfc39_ifTrack  = -1.;
+         I.pfc40_px       = 0;
+         I.pfc40_py       = 0;
+         I.pfc40_pz       = 0;
+         I.pfc40_energy   = 0;
+         I.pfc40_ifTrack  = -1.;
+
+
+
+
+
+    /*
     I.eta         = -9.;
     I.phi         = -9.;
     I.mass        = -1.;
@@ -386,11 +911,19 @@ void ObjectsFormat::ResetJetType(JetType& I) {
     I.matchBquark = -1;
     I.matchLL     = -1;
     I.original_jet_index = -1;
-
-    I.numOfDaughters     = -1;
+    */
+   
+    //I.numOfDaughters     = -1;
 }
 
-std::string ObjectsFormat::ListJetType() {return "pt/F:eta/F:phi/F:mass/F:energy/F:ptRaw/F:ptUnc/F:dPhi_met/F:dPhi_Jet1/F:puId/F:CSV/F:CSVR/F:CSVRUp/F:CSVRDown/F:CMVA/F:CMVAR/F:CMVARUp/F:CMVARDown/F:QGLikelihood/F:chf/F:nhf/F:phf/F:elf/F:muf/F:ptGenJ/F:etaGenJ/F:phiGenJ/F:massGenJ/F:ptGen/F:etaGen/F:phiGen/F:massGen/F:pdgIdGen/I:ptLhe/F:etaLhe/F:phiLhe/I:chm/I:npr/I:cm/I:nm/I:partonFlavour/I:hadronFlavour/I:mother/I:isLoose/O:isMedium/O:isTight/O:isTightLepVeto/O:isCSVL/O:isCSVM/O:isCSVT/O:isMatched/O:dR_q1/F:dR_q2/F:dR_q3/F:dR_q4/F:m_q1/O:m_q2/O:m_q3/O:m_q4/O:dR_pi1/F:dR_pi2/F:matchBquark/I:matchLL/I:original_jet_index/I:numOfDaughters/I";}
+std::string ObjectsFormat::ListJetType() {return "pt/F:pfc1_px/F:pfc1_py/F:pfc1_pz/F:pfc1_energy/F:pfc1_ifTrack/F:pfc2_px/F:pfc2_py/F:pfc2_pz/F:pfc2_energy/F:pfc2_ifTrack/F:pfc3_px/F:pfc3_py/F:pfc3_pz/F:pfc3_energy/F:pfc3_ifTrack/F:pfc4_px/F:pfc4_py/F:pfc4_pz/F:pfc4_energy/F:pfc4_ifTrack/F:pfc5_px/F:pfc5_py/F:pfc5_pz/F:pfc5_energy/F:pfc5_ifTrack/F:pfc6_px/F:pfc6_py/F:pfc6_pz/F:pfc6_energy/F:pfc6_ifTrack/F:pfc7_px/F:pfc7_py/F:pfc7_pz/F:pfc7_energy/F:pfc7_ifTrack/F:pfc8_px/F:pfc8_py/F:pfc8_pz/F:pfc8_energy/F:pfc8_ifTrack/F:pfc9_px/F:pfc9_py/F:pfc9_pz/F:pfc9_energy/F:pfc9_ifTrack/F:pfc10_px/F:pfc10_py/F:pfc10_pz/F:pfc10_energy/F:pfc10_ifTrack/F:pfc11_px/F:pfc11_py/F:pfc11_pz/F:pfc11_energy/F:pfc11_ifTrack/F:pfc12_px/F:pfc12_py/F:pfc12_pz/F:pfc12_energy/F:pfc12_ifTrack/F:pfc13_px/F:pfc13_py/F:pfc13_pz/F:pfc13_energy/F:pfc13_ifTrack/F:pfc14_px/F:pfc14_py/F:pfc14_pz/F:pfc14_energy/F:pfc14_ifTrack/F:pfc15_px/F:pfc15_py/F:pfc15_pz/F:pfc15_energy/F:pfc15_ifTrack/F:pfc16_px/F:pfc16_py/F:pfc16_pz/F:pfc16_energy/F:pfc16_ifTrack/F:pfc17_px/F:pfc17_py/F:pfc17_pz/F:pfc17_energy/F:pfc17_ifTrack/F:pfc18_px/F:pfc18_py/F:pfc18_pz/F:pfc18_energy/F:pfc18_ifTrack/F:pfc19_px/F:pfc19_py/F:pfc19_pz/F:pfc19_energy/F:pfc19_ifTrack/F:pfc20_px/F:pfc20_py/F:pfc20_pz/F:pfc20_energy/F:pfc20_ifTrack/F:pfc21_px/F:pfc21_py/F:pfc21_pz/F:pfc21_energy/F:pfc21_ifTrack/F:pfc22_px/F:pfc22_py/F:pfc22_pz/F:pfc22_energy/F:pfc22_ifTrack/F:pfc23_px/F:pfc23_py/F:pfc23_pz/F:pfc23_energy/F:pfc23_ifTrack/F:pfc24_px/F:pfc24_py/F:pfc24_pz/F:pfc24_energy/F:pfc24_ifTrack/F:pfc25_px/F:pfc25_py/F:pfc25_pz/F:pfc25_energy/F:pfc25_ifTrack/F:pfc26_px/F:pfc26_py/F:pfc26_pz/F:pfc26_energy/F:pfc26_ifTrack/F:pfc27_px/F:pfc27_py/F:pfc27_pz/F:pfc27_energy/F:pfc27_ifTrack/F:pfc28_px/F:pfc28_py/F:pfc28_pz/F:pfc28_energy/F:pfc28_ifTrack/F:pfc29_px/F:pfc29_py/F:pfc29_pz/F:pfc29_energy/F:pfc29_ifTrack/F:pfc30_px/F:pfc30_py/F:pfc30_pz/F:pfc30_energy/F:pfc30_ifTrack/F:pfc31_px/F:pfc31_py/F:pfc31_pz/F:pfc31_energy/F:pfc31_ifTrack/F:pfc32_px/F:pfc32_py/F:pfc32_pz/F:pfc32_energy/F:pfc32_ifTrack/F:pfc33_px/F:pfc33_py/F:pfc33_pz/F:pfc33_energy/F:pfc33_ifTrack/F:pfc34_px/F:pfc34_py/F:pfc34_pz/F:pfc34_energy/F:pfc34_ifTrack/F:pfc35_px/F:pfc35_py/F:pfc35_pz/F:pfc35_energy/F:pfc35_ifTrack/F:pfc36_px/F:pfc36_py/F:pfc36_pz/F:pfc36_energy/F:pfc36_ifTrack/F:pfc37_px/F:pfc37_py/F:pfc37_pz/F:pfc37_energy/F:pfc37_ifTrack/F:pfc38_px/F:pfc38_py/F:pfc38_pz/F:pfc38_energy/F:pfc38_ifTrack/F:pfc39_px/F:pfc39_py/F:pfc39_pz/F:pfc39_energy/F:pfc39_ifTrack/F:pfc40_px/F:pfc40_py/F:pfc40_pz/F:pfc40_energy/F:pfc40_ifTrack/F";}
+
+
+
+
+//<--------------brian
+//
+//std::string ObjectsFormat::ListJetType() {return "pt/F:eta/F:phi/F:mass/F:energy/F:ptRaw/F:ptUnc/F:dPhi_met/F:dPhi_Jet1/F:puId/F:CSV/F:CSVR/F:CSVRUp/F:CSVRDown/F:CMVA/F:CMVAR/F:CMVARUp/F:CMVARDown/F:QGLikelihood/F:chf/F:nhf/F:phf/F:elf/F:muf/F:ptGenJ/F:etaGenJ/F:phiGenJ/F:massGenJ/F:ptGen/F:etaGen/F:phiGen/F:massGen/F:pdgIdGen/I:ptLhe/F:etaLhe/F:phiLhe/I:chm/I:npr/I:cm/I:nm/I:partonFlavour/I:hadronFlavour/I:mother/I:isLoose/O:isMedium/O:isTight/O:isTightLepVeto/O:isCSVL/O:isCSVM/O:isCSVT/O:isMatched/O:dR_q1/F:dR_q2/F:dR_q3/F:dR_q4/F:m_q1/O:m_q2/O:m_q3/O:m_q4/O:dR_pi1/F:dR_pi2/F:matchBquark/I:matchLL/I:original_jet_index/I:numOfDaughters/I";}
 
 
 //*******************//

@@ -182,7 +182,7 @@ RecoStudiesCalo::RecoStudiesCalo(const edm::ParameterSet& iConfig):
     WriteNGenLongLiveds(iConfig.getParameter<int>("writeNGenLongLiveds")),
     isVerbose(iConfig.getParameter<bool> ("verbose")),
     isVerboseTrigger(iConfig.getParameter<bool> ("verboseTrigger"))
-
+    
 {
     //Initalize objects
     theCHSJetAnalyzer      = new JetAnalyzer(CHSJetPSet, consumesCollector());
@@ -193,6 +193,8 @@ RecoStudiesCalo::RecoStudiesCalo(const edm::ParameterSet& iConfig):
     theGenAnalyzer      = new GenAnalyzer(GenPSet, consumesCollector());
     thePileupAnalyzer   = new PileupAnalyzer(PileupPSet, consumesCollector());
     theTriggerAnalyzer  = new TriggerAnalyzer(TriggerPSet, consumesCollector());
+    
+
 
     std::vector<std::string> TriggerList(TriggerPSet.getParameter<std::vector<std::string> >("paths"));
     for(unsigned int i = 0; i < TriggerList.size(); i++) TriggerMap[ TriggerList[i] ] = false;
@@ -232,6 +234,7 @@ RecoStudiesCalo::RecoStudiesCalo(const edm::ParameterSet& iConfig):
     tree -> Branch("LumiNumber" , &LumiNumber , "LumiNumber/L");
     tree -> Branch("RunNumber" , &RunNumber , "RunNumber/L");
     tree -> Branch("nPV" , &nPV , "nPV/L");
+    /*
     tree -> Branch("PUWeight", &PUWeight, "PUWeight/F");
     tree -> Branch("nGenBquarks" , &nGenBquarks , "nGenBquarks/L");
     tree -> Branch("nGenLL" , &nGenLL , "nGenLL/L");
@@ -287,7 +290,9 @@ RecoStudiesCalo::RecoStudiesCalo(const edm::ParameterSet& iConfig):
     tree -> Branch("Flag_globalSuperTightHalo2016Filter", &trig_bit_flag_globalSuperTightHalo2016Filter, "Flag_globalSuperTightHalo2016Filter/B");
     tree -> Branch("Flag_BadChCand", &flag_BadChCand, "Flag_BadChCand/B");
     tree -> Branch("Flag_BadPFMuon", &flag_BadPFMuon, "Flag_BadPFMuon/B");
+    */
 
+    /*
     // Set trigger branches
     for(auto it = TriggerMap.begin(); it != TriggerMap.end(); it++) tree->Branch(it->first.c_str(), &(it->second), (it->first+"/O").c_str());
     if(isVerboseTrigger)//save PS values in ntuple
@@ -301,7 +306,12 @@ RecoStudiesCalo::RecoStudiesCalo(const edm::ParameterSet& iConfig):
 
     if(isVerbose) std::cout << "---------- STARTING ----------" << std::endl;
 
+    */
+
+
 }
+
+    
 
 
 RecoStudiesCalo::~RecoStudiesCalo()
@@ -334,6 +344,7 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     using namespace reco;
     using namespace std;
 
+
     // Initialize types
     for(int i = 0; i < WriteNJets; i++) ObjectsFormat::ResetJetType(Jets[i]);
     for(int i = 0; i < 4; i++) ObjectsFormat::ResetJetType(MatchedJets[i]);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -346,6 +357,8 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     for(int i = 0; i < WriteNFatJets; i++) ObjectsFormat::ResetFatJetType(CHSFatJets[i]);//??
     for(int i = 0; i < WriteNGenBquarks; i++) ObjectsFormat::ResetGenPType(GenBquarks[i]);
     for(int i = 0; i < WriteNGenLongLiveds; i++) ObjectsFormat::ResetGenPType(GenLongLiveds[i]);
+
+
 
     isMC = false;
     EventNumber = LumiNumber = RunNumber = nPV = 0;
@@ -384,6 +397,7 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	    }
         }
     }
+
 
     //BadChCand and BadPFMuon filters
     edm::Handle<bool> filterBadChCand; 
@@ -427,6 +441,7 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
     
 
+
     // Pu weight
     PUWeight     = thePileupAnalyzer->GetPUWeight(iEvent);
     
@@ -441,8 +456,92 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     nJets = JetsVect.size();
     std::vector<pat::Jet> MatchedJetsVect;
 
+
+    //<------------brian
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~test
+    //pat::Jet *jj = new pat::Jet;
+    //jj = &JetsVect[0];
+
+    //pat::Jet jjj = JetsVect[0]; //0
+    //reco::Candidate * jjj = JetsVect[0].daughter(0);    
+    //pat::Jet *jjjj = &JetsVect[0];
+    //const reco::Candidate * jjj = jjjj->daughter(0);
+    
+    //pat::Jet &jjjj = JetsVect[0];
+    //const reco::Candidate & jjj = * jjjj.daughter(0);
+
+    //cout << "Test: daughter-> px()" << endl;
+    //cout << (JetsVect[0].daughter(0))->px() << endl;
+    //cout << "Test: number of daughters:" << endl;
+    //if(JetsVect[0].numberOfDaughters()) cout << (JetsVect[2].numberOfDaughters()) << endl;
+    //cout << jj->numberOfDaughters() << endl;
+    //cout << jjj.numberOfDaughters() << endl;
+
+    //cout << JetsVect[0].daughter(0)->pt() << endl;
+    
+    //cout << jjjj.pt() << endl;
+    //cout << jjj->py() << endl;
+    //cout << jjj->pz() << endl;
+
+
+    //cout << JetsVect[0].isJet() << endl; 
+    
+    //getJetConstituentsQuick(success):
+    //cout << ((JetsVect[0].getJetConstituentsQuick())[0])->py() << endl;
+    //cout << ((JetsVect[0].getJetConstituentsQuick())[0])->energy() << endl;
+    //cout << ((JetsVect[0].getJetConstituentsQuick())[0])->numberOfDaughters() << endl;
+    //int nods = JetsVect[0].numberOfDaughters();
+    if (nJets != 0){
+      int nods = JetsVect[0].numberOfDaughters();
+//cout <<"!!!!!!debug!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+    cout << nods << endl;
+//cout <<"!!!!!!debug!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+  
+    cout << ((JetsVect[0].getJetConstituentsQuick())[0])->pdgId() << endl;       
+    cout << "~~~~~~~charge~~~~~~~~~~~" << endl;
+    cout << ((JetsVect[0].getJetConstituentsQuick())[0])->charge() << endl;
+    cout << "~~~~~~~charge~~~~~~~~~~~" << endl;
+
+}
+    //delete jjj;
+
+
+    //delete jj;
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~test
+
+
+
     for(unsigned int a = 0; a<JetsVect.size(); a++) 
       {
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~testing
+        /*
+        reco::Candidate * jjj = JetsVect[a].daughter(0);
+        cout << "Test: daughter->numberOfDaughters()" << endl;
+        cout << JetsVect[a].numberOfDaughters() << endl;
+
+        cout << "Test: daughter->energy()" << endl;
+        //cout << JetsVect[a].daughter(0)->energy() << endl;
+        cout << jjj->energy() << endl;
+        */
+
+
+        /*  
+        for(unsigned int ddd = 0; ddd < JetsVect[a].numberOfDaughters(); ddd++)
+          {
+  
+        	cout << "Test: daughter->energy()" << endl;
+        	//cout << JetsVect[a].daughter(ddd)->energy() << endl;
+  
+       		cout << "Test: daughter->py()" << endl;
+        	//cout << JetsVect[a].daughter(ddd)->py() << endl;
+        	//cout << "Test: daughter-> pz()" << endl;
+        	//cout << JetsVect[ddd].pz() << endl;     
+          }
+        */   
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~testing
+
+
 	      if(fabs(JetsVect[a].hadronFlavour())==5 || fabs(JetsVect[a].partonFlavour())==5) nJets_bFlav++;
        	if(fabs(JetsVect[a].hadronFlavour())==5) nJets_bHadronFlav++;
 	      if(JetsVect[a].genParton() && fabs(JetsVect[a].partonFlavour())==5) nJets_bPartonFlav++;
@@ -610,12 +709,6 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         for(unsigned int i = 0; i < CHSJetsVect.size(); i++) std::cout << "  CHS AK4 jet  [" << i << "]\tpt: " << CHSJetsVect[i].pt() << "\teta: " << CHSJetsVect[i].eta() << "\tphi: " << CHSJetsVect[i].phi() << "\tmass: " << CHSJetsVect[i].mass() << std::endl;
         std::cout << "number of AK4 jets:  " << JetsVect.size() << std::endl;
         for(unsigned int i = 0; i < JetsVect.size(); i++) std::cout << "  AK4 jet  [" << i << "]\tpt: " << JetsVect[i].pt() << "\teta: " << JetsVect[i].eta() << "\tphi: " << JetsVect[i].phi() << "\tmass: " << JetsVect[i].mass() << std::endl;
-        std::cout << "number of Macthed Calo AK4 jets:  " << MatchedCaloJetsVect.size() << std::endl;
-        for(unsigned int i = 0; i < MatchedCaloJetsVect.size(); i++) std::cout << "  Calo AK4 jet  [" << i << "]\tpt: " << MatchedCaloJetsVect[i].pt() << "\teta: " << MatchedCaloJetsVect[i].eta() << "\tphi: " << MatchedCaloJetsVect[i].phi() << "\tmass: " << MatchedCaloJetsVect[i].mass() << std::endl;
-        std::cout << "number of AK8 jets:  " << FatJetsVect.size() << std::endl;
-        for(unsigned int i = 0; i < FatJetsVect.size(); i++) std::cout << "  AK8 jet  [" << i << "]\tpt: " << FatJetsVect[i].pt() << "\teta: " << FatJetsVect[i].eta() << "\tphi: " << FatJetsVect[i].phi() << "\tmass: " << FatJetsVect[i].mass() << std::endl;
-        std::cout << "number of CHS AK8 jets:  " << CHSFatJetsVect.size() << std::endl;
-        for(unsigned int i = 0; i < CHSFatJetsVect.size(); i++) std::cout << "  AK8 jet  [" << i << "]\tpt: " << CHSFatJetsVect[i].pt() << "\teta: " << CHSFatJetsVect[i].eta() << "\tphi: " << CHSFatJetsVect[i].phi() << "\tmass: " << CHSFatJetsVect[i].mass() << std::endl;
       }
 
 
@@ -623,18 +716,11 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
     if(isVerbose) std::cout << " - Filling objects" << std::endl;
 
-    for(unsigned int i = 0; i < Jets.size() && i < JetsVect.size(); i++) ObjectsFormat::FillJetType(Jets[i], &JetsVect[i], isMC);
+    for(unsigned int i = 0; i < Jets.size() && i < JetsVect.size(); i++) ObjectsFormat::FillJetType(Jets[i], &JetsVect[i], isMC);  //,,??
     for(unsigned int i = 0; i < MatchedJets.size() && i < MatchedJetsVect.size(); i++) ObjectsFormat::FillJetType(MatchedJets[i], &MatchedJetsVect[i], isMC);
     for(unsigned int i = 0; i < MatchedCHSJets.size() && i < MatchedCHSJetsVect.size(); i++) ObjectsFormat::FillJetType(MatchedCHSJets[i], &MatchedCHSJetsVect[i], isMC);
-    for(unsigned int i = 0; i < MatchedPuppiJets.size() && i < MatchedPuppiJetsVect.size(); i++) ObjectsFormat::FillJetType(MatchedPuppiJets[i], &MatchedPuppiJetsVect[i], isMC);
-    for(unsigned int i = 0; i < MatchedCaloJets.size() && i < MatchedCaloJetsVect.size(); i++) ObjectsFormat::FillCaloJetType(MatchedCaloJets[i], &MatchedCaloJetsVect[i], isMC);
     for(unsigned int i = 0; i < CHSJets.size() && i < CHSJetsVect.size(); i++) ObjectsFormat::FillJetType(CHSJets[i], &CHSJetsVect[i], isMC);
-    for(unsigned int i = 0; i < PuppiJets.size() && i < PuppiJetsVect.size(); i++) ObjectsFormat::FillJetType(PuppiJets[i], &PuppiJetsVect[i], isMC);
-    for(unsigned int i = 0; i < FatJets.size() && i < FatJetsVect.size(); i++) ObjectsFormat::FillCustomFatJetType(FatJets[i], &FatJetsVect[i], isMC);//??
-    for(unsigned int i = 0; i < CHSFatJets.size() && i < CHSFatJetsVect.size(); i++) ObjectsFormat::FillFatJetType(CHSFatJets[i], &CHSFatJetsVect[i], isMC);//??
-    for(unsigned int i = 0; i < GenBquarks.size() && i < GenBquarksVect.size(); i++) ObjectsFormat::FillGenPType(GenBquarks[i], &GenBquarksVect[i]);
-    for(unsigned int i = 0; i < GenLongLiveds.size() && i < GenLongLivedVect.size(); i++) ObjectsFormat::FillGenPType(GenLongLiveds[i], &GenLongLivedVect[i]);
-
+ 
     tree -> Fill();
 
 
@@ -660,9 +746,10 @@ RecoStudiesCalo::beginJob()
     for(int i = 0; i < WriteNGenLongLiveds; i++) GenLongLiveds.push_back( GenPType() );
 
     //Set branches for objects
-    for(int i = 0; i < WriteNJets; i++) tree->Branch(("Jet"+std::to_string(i+1)).c_str(), &(Jets[i].pt), ObjectsFormat::ListJetType().c_str());
+    //for(int i = 0; i < WriteNJets; i++) tree->Branch(("Jet"+std::to_string(i+1)).c_str(), &(Jets[i].pt), ObjectsFormat::ListJetType().c_str());
     for(int i = 0; i < 4; i++) tree->Branch(("MatchedJet"+std::to_string(i+1)).c_str(), &(MatchedJets[i].pt), ObjectsFormat::ListJetType().c_str());
     for(int i = 0; i < 4; i++) tree->Branch(("MatchedCHSJet"+std::to_string(i+1)).c_str(), &(MatchedCHSJets[i].pt), ObjectsFormat::ListJetType().c_str());
+    /*
     for(int i = 0; i < 4; i++) tree->Branch(("MatchedPuppiJet"+std::to_string(i+1)).c_str(), &(MatchedPuppiJets[i].pt), ObjectsFormat::ListJetType().c_str());
     for(int i = 0; i < 4; i++) tree->Branch(("MatchedCaloJet"+std::to_string(i+1)).c_str(), &(MatchedCaloJets[i].pt), ObjectsFormat::ListCaloJetType().c_str());
     for(int i = 0; i < WriteNJets; i++) tree->Branch(("CHSJet"+std::to_string(i+1)).c_str(), &(CHSJets[i].pt), ObjectsFormat::ListJetType().c_str());
@@ -671,6 +758,7 @@ RecoStudiesCalo::beginJob()
     for(int i = 0; i < WriteNFatJets; i++) tree->Branch(("CHSFatJet"+std::to_string(i+1)).c_str(), &(CHSFatJets[i].pt), ObjectsFormat::ListFatJetType().c_str());//??
     for(int i = 0; i < WriteNGenBquarks; i++) tree->Branch(("GenBquark"+std::to_string(i+1)).c_str(), &(GenBquarks[i].pt), ObjectsFormat::ListGenPType().c_str());
     for(int i = 0; i < WriteNGenLongLiveds; i++) tree->Branch(("GenLongLived"+std::to_string(i+1)).c_str(), &(GenLongLiveds[i].pt), ObjectsFormat::ListGenPType().c_str());
+    */
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
