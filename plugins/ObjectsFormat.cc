@@ -194,6 +194,7 @@ void ObjectsFormat::FillTauType(TauType& I, const pat::Tau* R, bool isMC) {
     I.energy      = R->energy();
     I.pfIso       = R->hasUserFloat("pfIso") ? R->userFloat("pfIso") : -1.;
     I.dz          = R->hasUserFloat("dz") ? R->userFloat("dz") : 0.;
+
     I.charge      = R->charge();
     I.pdgId       = R->pdgId();
     I.isLoose     = R->hasUserInt("isLoose") ? R->userInt("isLoose") : false;
@@ -232,53 +233,55 @@ void ObjectsFormat::FillJetType(JetType& I, const pat::Jet* R, bool isMC) {
     I.pt          = R->pt();
   
     using namespace std;
-    const unsigned int & nods  = R->numberOfDaughters(); 
-    unsigned int * max_n                = new unsigned int;
-    float * max_pt             = new float;
-    unsigned int n_pfc = 40;
-    std::vector<float> * ptVect        = new std::vector<float>; 
-    std::vector<unsigned int> * leading_pfcVect = new std::vector<unsigned int>;       
+    const unsigned int & nods        = R->numberOfDaughters(); 
+    unsigned int       * max_n       = new unsigned int;
+    float              * max_pt      = new float;
+    unsigned int         n_pfc       = 40;
+    std::vector<float> * ptVect          = new std::vector<float>;        
     std::vector<float> * pxVect          = new std::vector<float>;
     std::vector<float> * pyVect          = new std::vector<float>;
     std::vector<float> * pzVect          = new std::vector<float>;
     std::vector<float> * energyVect      = new std::vector<float>;
-    std::vector<float>   * ifTrackVect   = new std::vector<float>;    
+    std::vector<int>   * ifTrackVect     = new std::vector<int>;    
+    std::vector<unsigned int> * leading_pfcVect = new std::vector<unsigned int>;
     
+    //put pt values of all constituents of the jet in a vector ptVect
     for(unsigned int i = 0; i < nods; i++)
       {
         ptVect->push_back(   ((R->getJetConstituentsQuick())[i])->pt()   );  
         cout << (*ptVect)[i] << endl;
       }
     cout << "====================================================================" << endl;
+    // n_pfc is 40 if number of the constituents are greater or equal to 40, else it is equal to the number of the constituents 
     if (n_pfc > nods) n_pfc = nods;    
 
-    for(unsigned int j = 0; j < n_pfc; j++)
+    for(unsigned int j = 0; j < n_pfc; j++) 
       {
         *max_n     = 0;
         *max_pt    = -1;
-        for(unsigned int i = 0; i < nods; i++)
+        for(unsigned int i = 0; i < nods; i++) // to find the max pt among those that are not put in the vector
           {
             //----check if coincide with previous index
             bool bool_last_max = true;
-            for(unsigned int k = 0; k < leading_pfcVect->size(); k++)
+            for(unsigned int k = 0; k < leading_pfcVect->size(); k++) 
               {
-                if(  (*leading_pfcVect)[k] == i  ) bool_last_max = false;
+                if(  (*leading_pfcVect)[k] == i  ) bool_last_max = false; // if the current index i is already in the leading_pfcVect: i should be skipped
               }
             //----check if coincide with previous index
-            if(  ( *max_pt <= (*ptVect)[i] ) && ( bool_last_max )  ) 
+            if(  ( *max_pt <= (*ptVect)[i] ) && ( bool_last_max )  ) // update the max_* variables if i corresponds to greater pt than previous max value and i not in vector leading_pfcVect 
               {  
                 *max_n  = i; 
                 *max_pt = (*ptVect)[i];
               }
           }
-        leading_pfcVect->push_back( *max_n );
+        leading_pfcVect->push_back( *max_n ); // fill the leading_pfcVect with pt corrected index of the constituents
       }
-       
+    // loop over the length of leading_pfcVect   
     if (n_pfc > leading_pfcVect->size()) n_pfc = leading_pfcVect->size();  
     for(unsigned int j = 0; j < n_pfc; j++)
       {
         cout << (*leading_pfcVect)[j] << endl;
-        ///////////////////
+        // fill vectors under correct pt order
         pxVect->push_back( ((R->getJetConstituentsQuick())[(*leading_pfcVect)[j]])->px() );    
         pyVect->push_back( ((R->getJetConstituentsQuick())[(*leading_pfcVect)[j]])->py() );
         pzVect->push_back( ((R->getJetConstituentsQuick())[(*leading_pfcVect)[j]])->pz() );
@@ -286,7 +289,9 @@ void ObjectsFormat::FillJetType(JetType& I, const pat::Jet* R, bool isMC) {
         if(   ((R->getJetConstituentsQuick())[(*leading_pfcVect)[j]])->charge() == 0   ) ifTrackVect->push_back( 0 );
         else ifTrackVect->push_back( 1 );
       }
-
+    if (pxVect->size() != 40) cout << "vec size: " << pxVect->size() << endl;
+    /*
+    // if length of pxVect is not 40, fill the vectors with default values until pxVect has length 40 
     for(unsigned int j = 0; j < 40; j++)
       {
         if(pxVect->size() != 40)
@@ -297,14 +302,15 @@ void ObjectsFormat::FillJetType(JetType& I, const pat::Jet* R, bool isMC) {
             energyVect->push_back( 0. );
             ifTrackVect->push_back( -1 );
           }
-      }  
+      }
+    */  
     cout << "--------------------------------------------------------------------" << endl;
     cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
     for(unsigned int i = 0; i < 40; i++)
       {
-        cout << (*pxVect)[i] << endl;
-        cout << (*energyVect)[i] << endl;
-        cout << (*ifTrackVect)[i] << endl;      
+        cout << "px: " << (*pxVect)[i] << endl;
+        cout << "energy: " << (*energyVect)[i] << endl;
+        cout << "ifTrack: " << (*ifTrackVect)[i] << endl;      
       }
     cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 
@@ -642,6 +648,217 @@ void ObjectsFormat::ResetJetType(JetType& I) {
 
 
 
+
+
+
+         I.pfc1_px       = 9999.;
+         I.pfc1_py       = 9999.;
+         I.pfc1_pz       = 9999.;
+         I.pfc1_energy   = 9999.;
+         I.pfc1_ifTrack  = -1;
+         I.pfc2_px       = 9999.;
+         I.pfc2_py       = 9999.;
+         I.pfc2_pz       = 9999.;
+         I.pfc2_energy   = 9999.;
+         I.pfc2_ifTrack  = -1;
+         I.pfc3_px       = 9999.;
+         I.pfc3_py       = 9999.;
+         I.pfc3_pz       = 9999.;
+         I.pfc3_energy   = 9999.;
+         I.pfc3_ifTrack  = -1;
+         I.pfc4_px       = 9999.;
+         I.pfc4_py       = 9999.;
+         I.pfc4_pz       = 9999.;
+         I.pfc4_energy   = 9999.;
+         I.pfc4_ifTrack  = -1;
+         I.pfc5_px       = 9999.;
+         I.pfc5_py       = 9999.;
+         I.pfc5_pz       = 9999.;
+         I.pfc5_energy   = 9999.;
+         I.pfc5_ifTrack  = -1;
+         I.pfc6_px       = 9999.;
+         I.pfc6_py       = 9999.;
+         I.pfc6_pz       = 9999.;
+         I.pfc6_energy   = 9999.;
+         I.pfc6_ifTrack  = -1;
+         I.pfc7_px       = 9999.;
+         I.pfc7_py       = 9999.;
+         I.pfc7_pz       = 9999.;
+         I.pfc7_energy   = 9999.;
+         I.pfc7_ifTrack  = -1;
+         I.pfc8_px       = 9999.;
+         I.pfc8_py       = 9999.;
+         I.pfc8_pz       = 9999.;
+         I.pfc8_energy   = 9999.;
+         I.pfc8_ifTrack  = -1;
+         I.pfc9_px       = 9999.;
+         I.pfc9_py       = 9999.;
+         I.pfc9_pz       = 9999.;
+         I.pfc9_energy   = 9999.;
+         I.pfc9_ifTrack  = -1;
+         I.pfc10_px       = 9999.;
+         I.pfc10_py       = 9999.;
+         I.pfc10_pz       = 9999.;
+         I.pfc10_energy   = 9999.;
+         I.pfc10_ifTrack  = -1;
+         I.pfc11_px       = 9999.;
+         I.pfc11_py       = 9999.;
+         I.pfc11_pz       = 9999.;
+         I.pfc11_energy   = 9999.;
+         I.pfc11_ifTrack  = -1;
+         I.pfc12_px       = 9999.;
+         I.pfc12_py       = 9999.;
+         I.pfc12_pz       = 9999.;
+         I.pfc12_energy   = 9999.;
+         I.pfc12_ifTrack  = -1;
+         I.pfc13_px       = 9999.;
+         I.pfc13_py       = 9999.;
+         I.pfc13_pz       = 9999.;
+         I.pfc13_energy   = 9999.;
+         I.pfc13_ifTrack  = -1;
+         I.pfc14_px       = 9999.;
+         I.pfc14_py       = 9999.;
+         I.pfc14_pz       = 9999.;
+         I.pfc14_energy   = 9999.;
+         I.pfc14_ifTrack  = -1;
+         I.pfc15_px       = 9999.;
+         I.pfc15_py       = 9999.;
+         I.pfc15_pz       = 9999.;
+         I.pfc15_energy   = 9999.;
+         I.pfc15_ifTrack  = -1;
+         I.pfc16_px       = 9999.;
+         I.pfc16_py       = 9999.;
+         I.pfc16_pz       = 9999.;
+         I.pfc16_energy   = 9999.;
+         I.pfc16_ifTrack  = -1;
+         I.pfc17_px       = 9999.;
+         I.pfc17_py       = 9999.;
+         I.pfc17_pz       = 9999.;
+         I.pfc17_energy   = 9999.;
+         I.pfc17_ifTrack  = -1;
+         I.pfc18_px       = 9999.;
+         I.pfc18_py       = 9999.;
+         I.pfc18_pz       = 9999.;
+         I.pfc18_energy   = 9999.;
+         I.pfc18_ifTrack  = -1;
+         I.pfc19_px       = 9999.;
+         I.pfc19_py       = 9999.;
+         I.pfc19_pz       = 9999.;
+         I.pfc19_energy   = 9999.;
+         I.pfc19_ifTrack  = -1;
+         I.pfc20_px       = 9999.;
+         I.pfc20_py       = 9999.;
+         I.pfc20_pz       = 9999.;
+         I.pfc20_energy   = 9999.;
+         I.pfc20_ifTrack  = -1;
+         I.pfc21_px       = 9999.;
+         I.pfc21_py       = 9999.;
+         I.pfc21_pz       = 9999.;
+         I.pfc21_energy   = 9999.;
+         I.pfc21_ifTrack  = -1;
+         I.pfc22_px       = 9999.;
+         I.pfc22_py       = 9999.;
+         I.pfc22_pz       = 9999.;
+         I.pfc22_energy   = 9999.;
+         I.pfc22_ifTrack  = -1;
+         I.pfc23_px       = 9999.;
+         I.pfc23_py       = 9999.;
+         I.pfc23_pz       = 9999.;
+         I.pfc23_energy   = 9999.;
+         I.pfc23_ifTrack  = -1;
+         I.pfc24_px       = 9999.;
+         I.pfc24_py       = 9999.;
+         I.pfc24_pz       = 9999.;
+         I.pfc24_energy   = 9999.;
+         I.pfc24_ifTrack  = -1;
+         I.pfc25_px       = 9999.;
+         I.pfc25_py       = 9999.;
+         I.pfc25_pz       = 9999.;
+         I.pfc25_energy   = 9999.;
+         I.pfc25_ifTrack  = -1;
+         I.pfc26_px       = 9999.;
+         I.pfc26_py       = 9999.;
+         I.pfc26_pz       = 9999.;
+         I.pfc26_energy   = 9999.;
+         I.pfc26_ifTrack  = -1;
+         I.pfc27_px       = 9999.;
+         I.pfc27_py       = 9999.;
+         I.pfc27_pz       = 9999.;
+         I.pfc27_energy   = 9999.;
+         I.pfc27_ifTrack  = -1;
+         I.pfc28_px       = 9999.;
+         I.pfc28_py       = 9999.;
+         I.pfc28_pz       = 9999.;
+         I.pfc28_energy   = 9999.;
+         I.pfc28_ifTrack  = -1;
+         I.pfc29_px       = 9999.;
+         I.pfc29_py       = 9999.;
+         I.pfc29_pz       = 9999.;
+         I.pfc29_energy   = 9999.;
+         I.pfc29_ifTrack  = -1;
+         I.pfc30_px       = 9999.;
+         I.pfc30_py       = 9999.;
+         I.pfc30_pz       = 9999.;
+         I.pfc30_energy   = 9999.;
+         I.pfc30_ifTrack  = -1;
+         I.pfc31_px       = 9999.;
+         I.pfc31_py       = 9999.;
+         I.pfc31_pz       = 9999.;
+         I.pfc31_energy   = 9999.;
+         I.pfc31_ifTrack  = -1;
+         I.pfc32_px       = 9999.;
+         I.pfc32_py       = 9999.;
+         I.pfc32_pz       = 9999.;
+         I.pfc32_energy   = 9999.;
+         I.pfc32_ifTrack  = -1;
+         I.pfc33_px       = 9999.;
+         I.pfc33_py       = 9999.;
+         I.pfc33_pz       = 9999.;
+         I.pfc33_energy   = 9999.;
+         I.pfc33_ifTrack  = -1;
+         I.pfc34_px       = 9999.;
+         I.pfc34_py       = 9999.;
+         I.pfc34_pz       = 9999.;
+         I.pfc34_energy   = 9999.;
+         I.pfc34_ifTrack  = -1;
+         I.pfc35_px       = 9999.;
+         I.pfc35_py       = 9999.;
+         I.pfc35_pz       = 9999.;
+         I.pfc35_energy   = 9999.;
+         I.pfc35_ifTrack  = -1;
+         I.pfc36_px       = 9999.;
+         I.pfc36_py       = 9999.;
+         I.pfc36_pz       = 9999.;
+         I.pfc36_energy   = 9999.;
+         I.pfc36_ifTrack  = -1;
+         I.pfc37_px       = 9999.;
+         I.pfc37_py       = 9999.;
+         I.pfc37_pz       = 9999.;
+         I.pfc37_energy   = 9999.;
+         I.pfc37_ifTrack  = -1;
+         I.pfc38_px       = 9999.;
+         I.pfc38_py       = 9999.;
+         I.pfc38_pz       = 9999.;
+         I.pfc38_energy   = 9999.;
+         I.pfc38_ifTrack  = -1;
+         I.pfc39_px       = 9999.;
+         I.pfc39_py       = 9999.;
+         I.pfc39_pz       = 9999.;
+         I.pfc39_energy   = 9999.;
+         I.pfc39_ifTrack  = -1;
+         I.pfc40_px       = 9999.;
+         I.pfc40_py       = 9999.;
+         I.pfc40_pz       = 9999.;
+         I.pfc40_energy   = 9999.;
+         I.pfc40_ifTrack  = -1;
+
+
+
+
+
+
+
+         /*
          I.pfc1_px       = 0;
          I.pfc1_py       = 0;
          I.pfc1_pz       = 0;
@@ -842,7 +1059,7 @@ void ObjectsFormat::ResetJetType(JetType& I) {
          I.pfc40_pz       = 0;
          I.pfc40_energy   = 0;
          I.pfc40_ifTrack  = -1.;
-
+         */
 
 
 
@@ -916,7 +1133,14 @@ void ObjectsFormat::ResetJetType(JetType& I) {
     //I.numOfDaughters     = -1;
 }
 
-std::string ObjectsFormat::ListJetType() {return "pt/F:pfc1_px/F:pfc1_py/F:pfc1_pz/F:pfc1_energy/F:pfc1_ifTrack/F:pfc2_px/F:pfc2_py/F:pfc2_pz/F:pfc2_energy/F:pfc2_ifTrack/F:pfc3_px/F:pfc3_py/F:pfc3_pz/F:pfc3_energy/F:pfc3_ifTrack/F:pfc4_px/F:pfc4_py/F:pfc4_pz/F:pfc4_energy/F:pfc4_ifTrack/F:pfc5_px/F:pfc5_py/F:pfc5_pz/F:pfc5_energy/F:pfc5_ifTrack/F:pfc6_px/F:pfc6_py/F:pfc6_pz/F:pfc6_energy/F:pfc6_ifTrack/F:pfc7_px/F:pfc7_py/F:pfc7_pz/F:pfc7_energy/F:pfc7_ifTrack/F:pfc8_px/F:pfc8_py/F:pfc8_pz/F:pfc8_energy/F:pfc8_ifTrack/F:pfc9_px/F:pfc9_py/F:pfc9_pz/F:pfc9_energy/F:pfc9_ifTrack/F:pfc10_px/F:pfc10_py/F:pfc10_pz/F:pfc10_energy/F:pfc10_ifTrack/F:pfc11_px/F:pfc11_py/F:pfc11_pz/F:pfc11_energy/F:pfc11_ifTrack/F:pfc12_px/F:pfc12_py/F:pfc12_pz/F:pfc12_energy/F:pfc12_ifTrack/F:pfc13_px/F:pfc13_py/F:pfc13_pz/F:pfc13_energy/F:pfc13_ifTrack/F:pfc14_px/F:pfc14_py/F:pfc14_pz/F:pfc14_energy/F:pfc14_ifTrack/F:pfc15_px/F:pfc15_py/F:pfc15_pz/F:pfc15_energy/F:pfc15_ifTrack/F:pfc16_px/F:pfc16_py/F:pfc16_pz/F:pfc16_energy/F:pfc16_ifTrack/F:pfc17_px/F:pfc17_py/F:pfc17_pz/F:pfc17_energy/F:pfc17_ifTrack/F:pfc18_px/F:pfc18_py/F:pfc18_pz/F:pfc18_energy/F:pfc18_ifTrack/F:pfc19_px/F:pfc19_py/F:pfc19_pz/F:pfc19_energy/F:pfc19_ifTrack/F:pfc20_px/F:pfc20_py/F:pfc20_pz/F:pfc20_energy/F:pfc20_ifTrack/F:pfc21_px/F:pfc21_py/F:pfc21_pz/F:pfc21_energy/F:pfc21_ifTrack/F:pfc22_px/F:pfc22_py/F:pfc22_pz/F:pfc22_energy/F:pfc22_ifTrack/F:pfc23_px/F:pfc23_py/F:pfc23_pz/F:pfc23_energy/F:pfc23_ifTrack/F:pfc24_px/F:pfc24_py/F:pfc24_pz/F:pfc24_energy/F:pfc24_ifTrack/F:pfc25_px/F:pfc25_py/F:pfc25_pz/F:pfc25_energy/F:pfc25_ifTrack/F:pfc26_px/F:pfc26_py/F:pfc26_pz/F:pfc26_energy/F:pfc26_ifTrack/F:pfc27_px/F:pfc27_py/F:pfc27_pz/F:pfc27_energy/F:pfc27_ifTrack/F:pfc28_px/F:pfc28_py/F:pfc28_pz/F:pfc28_energy/F:pfc28_ifTrack/F:pfc29_px/F:pfc29_py/F:pfc29_pz/F:pfc29_energy/F:pfc29_ifTrack/F:pfc30_px/F:pfc30_py/F:pfc30_pz/F:pfc30_energy/F:pfc30_ifTrack/F:pfc31_px/F:pfc31_py/F:pfc31_pz/F:pfc31_energy/F:pfc31_ifTrack/F:pfc32_px/F:pfc32_py/F:pfc32_pz/F:pfc32_energy/F:pfc32_ifTrack/F:pfc33_px/F:pfc33_py/F:pfc33_pz/F:pfc33_energy/F:pfc33_ifTrack/F:pfc34_px/F:pfc34_py/F:pfc34_pz/F:pfc34_energy/F:pfc34_ifTrack/F:pfc35_px/F:pfc35_py/F:pfc35_pz/F:pfc35_energy/F:pfc35_ifTrack/F:pfc36_px/F:pfc36_py/F:pfc36_pz/F:pfc36_energy/F:pfc36_ifTrack/F:pfc37_px/F:pfc37_py/F:pfc37_pz/F:pfc37_energy/F:pfc37_ifTrack/F:pfc38_px/F:pfc38_py/F:pfc38_pz/F:pfc38_energy/F:pfc38_ifTrack/F:pfc39_px/F:pfc39_py/F:pfc39_pz/F:pfc39_energy/F:pfc39_ifTrack/F:pfc40_px/F:pfc40_py/F:pfc40_pz/F:pfc40_energy/F:pfc40_ifTrack/F";}
+
+
+
+std::string ObjectsFormat::ListJetType() {return "pt/F:pfc1_px/F:pfc1_py/F:pfc1_pz/F:pfc1_energy/F:pfc1_ifTrack/I:pfc2_px/F:pfc2_py/F:pfc2_pz/F:pfc2_energy/F:pfc2_ifTrack/I:pfc3_px/F:pfc3_py/F:pfc3_pz/F:pfc3_energy/F:pfc3_ifTrack/I:pfc4_px/F:pfc4_py/F:pfc4_pz/F:pfc4_energy/F:pfc4_ifTrack/I:pfc5_px/F:pfc5_py/F:pfc5_pz/F:pfc5_energy/F:pfc5_ifTrack/I:pfc6_px/F:pfc6_py/F:pfc6_pz/F:pfc6_energy/F:pfc6_ifTrack/I:pfc7_px/F:pfc7_py/F:pfc7_pz/F:pfc7_energy/F:pfc7_ifTrack/I:pfc8_px/F:pfc8_py/F:pfc8_pz/F:pfc8_energy/F:pfc8_ifTrack/I:pfc9_px/F:pfc9_py/F:pfc9_pz/F:pfc9_energy/F:pfc9_ifTrack/I:pfc10_px/F:pfc10_py/F:pfc10_pz/F:pfc10_energy/F:pfc10_ifTrack/I:pfc11_px/F:pfc11_py/F:pfc11_pz/F:pfc11_energy/F:pfc11_ifTrack/I:pfc12_px/F:pfc12_py/F:pfc12_pz/F:pfc12_energy/F:pfc12_ifTrack/I:pfc13_px/F:pfc13_py/F:pfc13_pz/F:pfc13_energy/F:pfc13_ifTrack/I:pfc14_px/F:pfc14_py/F:pfc14_pz/F:pfc14_energy/F:pfc14_ifTrack/I:pfc15_px/F:pfc15_py/F:pfc15_pz/F:pfc15_energy/F:pfc15_ifTrack/I:pfc16_px/F:pfc16_py/F:pfc16_pz/F:pfc16_energy/F:pfc16_ifTrack/I:pfc17_px/F:pfc17_py/F:pfc17_pz/F:pfc17_energy/F:pfc17_ifTrack/I:pfc18_px/F:pfc18_py/F:pfc18_pz/F:pfc18_energy/F:pfc18_ifTrack/I:pfc19_px/F:pfc19_py/F:pfc19_pz/F:pfc19_energy/F:pfc19_ifTrack/I:pfc20_px/F:pfc20_py/F:pfc20_pz/F:pfc20_energy/F:pfc20_ifTrack/I:pfc21_px/F:pfc21_py/F:pfc21_pz/F:pfc21_energy/F:pfc21_ifTrack/I:pfc22_px/F:pfc22_py/F:pfc22_pz/F:pfc22_energy/F:pfc22_ifTrack/I:pfc23_px/F:pfc23_py/F:pfc23_pz/F:pfc23_energy/F:pfc23_ifTrack/I:pfc24_px/F:pfc24_py/F:pfc24_pz/F:pfc24_energy/F:pfc24_ifTrack/I:pfc25_px/F:pfc25_py/F:pfc25_pz/F:pfc25_energy/F:pfc25_ifTrack/I:pfc26_px/F:pfc26_py/F:pfc26_pz/F:pfc26_energy/F:pfc26_ifTrack/I:pfc27_px/F:pfc27_py/F:pfc27_pz/F:pfc27_energy/F:pfc27_ifTrack/I:pfc28_px/F:pfc28_py/F:pfc28_pz/F:pfc28_energy/F:pfc28_ifTrack/I:pfc29_px/F:pfc29_py/F:pfc29_pz/F:pfc29_energy/F:pfc29_ifTrack/I:pfc30_px/F:pfc30_py/F:pfc30_pz/F:pfc30_energy/F:pfc30_ifTrack/I:pfc31_px/F:pfc31_py/F:pfc31_pz/F:pfc31_energy/F:pfc31_ifTrack/I:pfc32_px/F:pfc32_py/F:pfc32_pz/F:pfc32_energy/F:pfc32_ifTrack/I:pfc33_px/F:pfc33_py/F:pfc33_pz/F:pfc33_energy/F:pfc33_ifTrack/I:pfc34_px/F:pfc34_py/F:pfc34_pz/F:pfc34_energy/F:pfc34_ifTrack/I:pfc35_px/F:pfc35_py/F:pfc35_pz/F:pfc35_energy/F:pfc35_ifTrack/I:pfc36_px/F:pfc36_py/F:pfc36_pz/F:pfc36_energy/F:pfc36_ifTrack/I:pfc37_px/F:pfc37_py/F:pfc37_pz/F:pfc37_energy/F:pfc37_ifTrack/I:pfc38_px/F:pfc38_py/F:pfc38_pz/F:pfc38_energy/F:pfc38_ifTrack/I:pfc39_px/F:pfc39_py/F:pfc39_pz/F:pfc39_energy/F:pfc39_ifTrack/I:pfc40_px/F:pfc40_py/F:pfc40_pz/F:pfc40_energy/F:pfc40_ifTrack/I";}
+
+
+//<----brian
+//std::string ObjectsFormat::ListJetType() {return "pt/F:pfc1_px/F:pfc1_py/F:pfc1_pz/F:pfc1_energy/F:pfc1_ifTrack/F:pfc2_px/F:pfc2_py/F:pfc2_pz/F:pfc2_energy/F:pfc2_ifTrack/F:pfc3_px/F:pfc3_py/F:pfc3_pz/F:pfc3_energy/F:pfc3_ifTrack/F:pfc4_px/F:pfc4_py/F:pfc4_pz/F:pfc4_energy/F:pfc4_ifTrack/F:pfc5_px/F:pfc5_py/F:pfc5_pz/F:pfc5_energy/F:pfc5_ifTrack/F:pfc6_px/F:pfc6_py/F:pfc6_pz/F:pfc6_energy/F:pfc6_ifTrack/F:pfc7_px/F:pfc7_py/F:pfc7_pz/F:pfc7_energy/F:pfc7_ifTrack/F:pfc8_px/F:pfc8_py/F:pfc8_pz/F:pfc8_energy/F:pfc8_ifTrack/F:pfc9_px/F:pfc9_py/F:pfc9_pz/F:pfc9_energy/F:pfc9_ifTrack/F:pfc10_px/F:pfc10_py/F:pfc10_pz/F:pfc10_energy/F:pfc10_ifTrack/F:pfc11_px/F:pfc11_py/F:pfc11_pz/F:pfc11_energy/F:pfc11_ifTrack/F:pfc12_px/F:pfc12_py/F:pfc12_pz/F:pfc12_energy/F:pfc12_ifTrack/F:pfc13_px/F:pfc13_py/F:pfc13_pz/F:pfc13_energy/F:pfc13_ifTrack/F:pfc14_px/F:pfc14_py/F:pfc14_pz/F:pfc14_energy/F:pfc14_ifTrack/F:pfc15_px/F:pfc15_py/F:pfc15_pz/F:pfc15_energy/F:pfc15_ifTrack/F:pfc16_px/F:pfc16_py/F:pfc16_pz/F:pfc16_energy/F:pfc16_ifTrack/F:pfc17_px/F:pfc17_py/F:pfc17_pz/F:pfc17_energy/F:pfc17_ifTrack/F:pfc18_px/F:pfc18_py/F:pfc18_pz/F:pfc18_energy/F:pfc18_ifTrack/F:pfc19_px/F:pfc19_py/F:pfc19_pz/F:pfc19_energy/F:pfc19_ifTrack/F:pfc20_px/F:pfc20_py/F:pfc20_pz/F:pfc20_energy/F:pfc20_ifTrack/F:pfc21_px/F:pfc21_py/F:pfc21_pz/F:pfc21_energy/F:pfc21_ifTrack/F:pfc22_px/F:pfc22_py/F:pfc22_pz/F:pfc22_energy/F:pfc22_ifTrack/F:pfc23_px/F:pfc23_py/F:pfc23_pz/F:pfc23_energy/F:pfc23_ifTrack/F:pfc24_px/F:pfc24_py/F:pfc24_pz/F:pfc24_energy/F:pfc24_ifTrack/F:pfc25_px/F:pfc25_py/F:pfc25_pz/F:pfc25_energy/F:pfc25_ifTrack/F:pfc26_px/F:pfc26_py/F:pfc26_pz/F:pfc26_energy/F:pfc26_ifTrack/F:pfc27_px/F:pfc27_py/F:pfc27_pz/F:pfc27_energy/F:pfc27_ifTrack/F:pfc28_px/F:pfc28_py/F:pfc28_pz/F:pfc28_energy/F:pfc28_ifTrack/F:pfc29_px/F:pfc29_py/F:pfc29_pz/F:pfc29_energy/F:pfc29_ifTrack/F:pfc30_px/F:pfc30_py/F:pfc30_pz/F:pfc30_energy/F:pfc30_ifTrack/F:pfc31_px/F:pfc31_py/F:pfc31_pz/F:pfc31_energy/F:pfc31_ifTrack/F:pfc32_px/F:pfc32_py/F:pfc32_pz/F:pfc32_energy/F:pfc32_ifTrack/F:pfc33_px/F:pfc33_py/F:pfc33_pz/F:pfc33_energy/F:pfc33_ifTrack/F:pfc34_px/F:pfc34_py/F:pfc34_pz/F:pfc34_energy/F:pfc34_ifTrack/F:pfc35_px/F:pfc35_py/F:pfc35_pz/F:pfc35_energy/F:pfc35_ifTrack/F:pfc36_px/F:pfc36_py/F:pfc36_pz/F:pfc36_energy/F:pfc36_ifTrack/F:pfc37_px/F:pfc37_py/F:pfc37_pz/F:pfc37_energy/F:pfc37_ifTrack/F:pfc38_px/F:pfc38_py/F:pfc38_pz/F:pfc38_energy/F:pfc38_ifTrack/F:pfc39_px/F:pfc39_py/F:pfc39_pz/F:pfc39_energy/F:pfc39_ifTrack/F:pfc40_px/F:pfc40_py/F:pfc40_pz/F:pfc40_energy/F:pfc40_ifTrack/F";}
 
 
 
