@@ -290,12 +290,20 @@ void ObjectsFormat::FillJetType(JetType& I, const pat::Jet* R, bool isMC) {
       {
         cout << leading_pfcVect->at(j) << endl;
         // fill vectors under correct pt order
-        pxVect.push_back(   (  ( R->getJetConstituentsQuick() ).at(leading_pfcVect->at(j))  )->px()   );    
+        pxVect.at(j)     = (  ( R->getJetConstituentsQuick() ).at(leading_pfcVect->at(j))  )->px()    ;    
+        pyVect.at(j)     = (  ( R->getJetConstituentsQuick() ).at(leading_pfcVect->at(j))  )->py()    ;
+        pzVect.at(j)     = (  ( R->getJetConstituentsQuick() ).at(leading_pfcVect->at(j))  )->pz()    ;
+        energyVect.at(j) = (  ( R->getJetConstituentsQuick() ).at(leading_pfcVect->at(j))  )->energy();
+        if(   ((R->getJetConstituentsQuick()).at(leading_pfcVect->at(j)))->charge() == 0   ) ifTrackVect.at(j) = 0;
+        else ifTrackVect.at(j) = 1;
+        /*  
+        pxVect.push_back(   (  ( R->getJetConstituentsQuick() ).at(leading_pfcVect->at(j))  )->px()   );
         pyVect.push_back(   (  ( R->getJetConstituentsQuick() ).at(leading_pfcVect->at(j))  )->py()   );
         pzVect.push_back(   (  ( R->getJetConstituentsQuick() ).at(leading_pfcVect->at(j))  )->pz()   );
         energyVect.push_back( ((R->getJetConstituentsQuick() )[leading_pfcVect->at(j)])->energy() );
         if(   ((R->getJetConstituentsQuick()).at(leading_pfcVect->at(j)))->charge() == 0   ) ifTrackVect.push_back( 0 );
         else ifTrackVect.push_back( 1 );
+        */  
       }
     if (pxVect.size() != 40) cout << "vec size: " << pxVect.size() << endl;
     /*

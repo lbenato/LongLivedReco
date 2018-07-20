@@ -492,14 +492,14 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     //cout << ((JetsVect[0].getJetConstituentsQuick())[0])->numberOfDaughters() << endl;
     //int nods = JetsVect[0].numberOfDaughters();
     if (nJets != 0){
-      int nods = JetsVect[0].numberOfDaughters();
+      int nods = JetsVect.at(0).numberOfDaughters();
 //cout <<"!!!!!!debug!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
     cout << nods << endl;
 //cout <<"!!!!!!debug!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
   
-    cout << ((JetsVect[0].getJetConstituentsQuick())[0])->pdgId() << endl;       
+    cout << ((JetsVect.at(0).getJetConstituentsQuick()).at(0))->pdgId() << endl;       
     cout << "~~~~~~~charge~~~~~~~~~~~" << endl;
-    cout << ((JetsVect[0].getJetConstituentsQuick())[0])->charge() << endl;
+    cout << ((JetsVect.at(0).getJetConstituentsQuick()).at(0))->charge() << endl;
     cout << "~~~~~~~charge~~~~~~~~~~~" << endl;
 
 }
@@ -733,7 +733,8 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 void 
 RecoStudiesCalo::beginJob()
 {
-    for(int i = 0; i < WriteNJets; i++) Jets.push_back( JetType() );
+    for(int i = 0; i < WriteNJets; i++) Jets.push_back( JetType() ); //====> for qcd WriteNJets = 10
+
     for(int i = 0; i < 4; i++) MatchedJets.push_back( JetType() );
     for(int i = 0; i < 4; i++) MatchedCHSJets.push_back( JetType() );
     for(int i = 0; i < 4; i++) MatchedPuppiJets.push_back( JetType() );
@@ -747,7 +748,7 @@ RecoStudiesCalo::beginJob()
 
     //Set branches for objects
     //for(int i = 0; i < WriteNJets; i++) tree->Branch(("Jet"+std::to_string(i+1)).c_str(), &(Jets[i].pt), ObjectsFormat::ListJetType().c_str());
-    for(int i = 0; i < 4; i++) tree->Branch(("MatchedJet"+std::to_string(i+1)).c_str(), &(MatchedJets[i].pt), ObjectsFormat::ListJetType().c_str());
+    //for(int i = 0; i < 4; i++) tree->Branch(("MatchedJet"+std::to_string(i+1)).c_str(), &(MatchedJets[i].pt), ObjectsFormat::ListJetType().c_str());
     for(int i = 0; i < 4; i++) tree->Branch(("MatchedCHSJet"+std::to_string(i+1)).c_str(), &(MatchedCHSJets[i].pt), ObjectsFormat::ListJetType().c_str());
     /*
     for(int i = 0; i < 4; i++) tree->Branch(("MatchedPuppiJet"+std::to_string(i+1)).c_str(), &(MatchedPuppiJets[i].pt), ObjectsFormat::ListJetType().c_str());
