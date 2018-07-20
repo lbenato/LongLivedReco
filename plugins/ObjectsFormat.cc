@@ -238,18 +238,26 @@ void ObjectsFormat::FillJetType(JetType& I, const pat::Jet* R, bool isMC) {
     float              * max_pt      = new float;
     unsigned int         n_pfc       = 40;
     std::vector<float> * ptVect          = new std::vector<float>;        
-    std::vector<float> * pxVect          = new std::vector<float>;
-    std::vector<float> * pyVect          = new std::vector<float>;
-    std::vector<float> * pzVect          = new std::vector<float>;
-    std::vector<float> * energyVect      = new std::vector<float>;
-    std::vector<int>   * ifTrackVect     = new std::vector<int>;    
+    //std::vector<float> * pxVect          = new std::vector<float>;
+    //std::vector<float> * pyVect          = new std::vector<float>;
+    //std::vector<float> * pzVect          = new std::vector<float>;
+    //std::vector<float> * energyVect      = new std::vector<float>;
+    //std::vector<int>   * ifTrackVect     = new std::vector<int>;    
+    vector<float> pxVect(40, 9999.);
+    vector<float> pyVect(40, 9999.);
+    vector<float> pzVect(40, 9999.);
+    vector<float> energyVect(40, 9999.);
+    vector<float> ifTrackVect(40, -1);
+
+
+
     std::vector<unsigned int> * leading_pfcVect = new std::vector<unsigned int>;
     
     //put pt values of all constituents of the jet in a vector ptVect
     for(unsigned int i = 0; i < nods; i++)
       {
-        ptVect->push_back(   ((R->getJetConstituentsQuick())[i])->pt()   );  
-        cout << (*ptVect)[i] << endl;
+        ptVect->push_back(   (  ( R->getJetConstituentsQuick() ).at(i)  )->pt()   );  
+        cout << ptVect->at(i) << endl;
       }
     cout << "====================================================================" << endl;
     // n_pfc is 40 if number of the constituents are greater or equal to 40, else it is equal to the number of the constituents 
@@ -265,13 +273,13 @@ void ObjectsFormat::FillJetType(JetType& I, const pat::Jet* R, bool isMC) {
             bool bool_last_max = true;
             for(unsigned int k = 0; k < leading_pfcVect->size(); k++) 
               {
-                if(  (*leading_pfcVect)[k] == i  ) bool_last_max = false; // if the current index i is already in the leading_pfcVect: i should be skipped
+                if(  leading_pfcVect->at(k) == i  ) bool_last_max = false; // if the current index i is already in the leading_pfcVect: i should be skipped
               }
             //----check if coincide with previous index
-            if(  ( *max_pt <= (*ptVect)[i] ) && ( bool_last_max )  ) // update the max_* variables if i corresponds to greater pt than previous max value and i not in vector leading_pfcVect 
+            if(  ( *max_pt <= ptVect->at(i) ) && ( bool_last_max )  ) // update the max_* variables if i corresponds to greater pt than previous max value and i not in vector leading_pfcVect 
               {  
                 *max_n  = i; 
-                *max_pt = (*ptVect)[i];
+                *max_pt = ptVect->at(i);
               }
           }
         leading_pfcVect->push_back( *max_n ); // fill the leading_pfcVect with pt corrected index of the constituents
@@ -280,241 +288,251 @@ void ObjectsFormat::FillJetType(JetType& I, const pat::Jet* R, bool isMC) {
     if (n_pfc > leading_pfcVect->size()) n_pfc = leading_pfcVect->size();  
     for(unsigned int j = 0; j < n_pfc; j++)
       {
-        cout << (*leading_pfcVect)[j] << endl;
+        cout << leading_pfcVect->at(j) << endl;
         // fill vectors under correct pt order
-        pxVect->push_back( ((R->getJetConstituentsQuick())[(*leading_pfcVect)[j]])->px() );    
-        pyVect->push_back( ((R->getJetConstituentsQuick())[(*leading_pfcVect)[j]])->py() );
-        pzVect->push_back( ((R->getJetConstituentsQuick())[(*leading_pfcVect)[j]])->pz() );
-        energyVect->push_back( ((R->getJetConstituentsQuick())[(*leading_pfcVect)[j]])->energy() );
-        if(   ((R->getJetConstituentsQuick())[(*leading_pfcVect)[j]])->charge() == 0   ) ifTrackVect->push_back( 0 );
-        else ifTrackVect->push_back( 1 );
+        pxVect.push_back(   (  ( R->getJetConstituentsQuick() ).at(leading_pfcVect->at(j))  )->px()   );    
+        pyVect.push_back(   (  ( R->getJetConstituentsQuick() ).at(leading_pfcVect->at(j))  )->py()   );
+        pzVect.push_back(   (  ( R->getJetConstituentsQuick() ).at(leading_pfcVect->at(j))  )->pz()   );
+        energyVect.push_back( ((R->getJetConstituentsQuick() )[leading_pfcVect->at(j)])->energy() );
+        if(   ((R->getJetConstituentsQuick()).at(leading_pfcVect->at(j)))->charge() == 0   ) ifTrackVect.push_back( 0 );
+        else ifTrackVect.push_back( 1 );
       }
-    if (pxVect->size() != 40) cout << "vec size: " << pxVect->size() << endl;
+    if (pxVect.size() != 40) cout << "vec size: " << pxVect.size() << endl;
     /*
     // if length of pxVect is not 40, fill the vectors with default values until pxVect has length 40 
     for(unsigned int j = 0; j < 40; j++)
       {
         if(pxVect->size() != 40)
           {
-            pxVect->push_back( 0. );
-            pyVect->push_back( 0. );
-            pzVect->push_back( 0. );
-            energyVect->push_back( 0. );
+            pxVect->push_back( 9999. );
+            pyVect->push_back( 9999. );
+            pzVect->push_back( 9999. );
+            energyVect->push_back( 9999. );
             ifTrackVect->push_back( -1 );
           }
       }
     */  
     cout << "--------------------------------------------------------------------" << endl;
     cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-    for(unsigned int i = 0; i < 40; i++)
+    for(unsigned int i = 0; i < pxVect.size(); i++)
       {
-        cout << "px: " << (*pxVect)[i] << endl;
-        cout << "energy: " << (*energyVect)[i] << endl;
-        cout << "ifTrack: " << (*ifTrackVect)[i] << endl;      
+        cout << "px: " << pxVect.at(i) << endl;
+        cout << "energy: " << energyVect.at(i) << endl;
+        cout << "ifTrack: " << ifTrackVect.at(i) << endl;      
       }
     cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 
 
-         I.pfc1_px       = (*pxVect)[0];
-         I.pfc1_py       = (*pyVect)[0];
-         I.pfc1_pz       = (*pzVect)[0];
-         I.pfc1_energy   = (*energyVect)[0];
-         I.pfc1_ifTrack  = (*ifTrackVect)[0];
-         I.pfc2_px       = (*pxVect)[1];
-         I.pfc2_py       = (*pyVect)[1];
-         I.pfc2_pz       = (*pzVect)[1];
-         I.pfc2_energy   = (*energyVect)[1];
-         I.pfc2_ifTrack  = (*ifTrackVect)[1];
-         I.pfc3_px       = (*pxVect)[2];
-         I.pfc3_py       = (*pyVect)[2];
-         I.pfc3_pz       = (*pzVect)[2];
-         I.pfc3_energy   = (*energyVect)[2];
-         I.pfc3_ifTrack  = (*ifTrackVect)[2];
-         I.pfc4_px       = (*pxVect)[3];
-         I.pfc4_py       = (*pyVect)[3];
-         I.pfc4_pz       = (*pzVect)[3];
-         I.pfc4_energy   = (*energyVect)[3];
-         I.pfc4_ifTrack  = (*ifTrackVect)[3];
-         I.pfc5_px       = (*pxVect)[4];
-         I.pfc5_py       = (*pyVect)[4];
-         I.pfc5_pz       = (*pzVect)[4];
-         I.pfc5_energy   = (*energyVect)[4];
-         I.pfc5_ifTrack  = (*ifTrackVect)[4];
-         I.pfc6_px       = (*pxVect)[5];
-         I.pfc6_py       = (*pyVect)[5];
-         I.pfc6_pz       = (*pzVect)[5];
-         I.pfc6_energy   = (*energyVect)[5];
-         I.pfc6_ifTrack  = (*ifTrackVect)[5];
-         I.pfc7_px       = (*pxVect)[6];
-         I.pfc7_py       = (*pyVect)[6];
-         I.pfc7_pz       = (*pzVect)[6];
-         I.pfc7_energy   = (*energyVect)[6];
-         I.pfc7_ifTrack  = (*ifTrackVect)[6];
-         I.pfc8_px       = (*pxVect)[7];
-         I.pfc8_py       = (*pyVect)[7];
-         I.pfc8_pz       = (*pzVect)[7];
-         I.pfc8_energy   = (*energyVect)[7];
-         I.pfc8_ifTrack  = (*ifTrackVect)[7];
-         I.pfc9_px       = (*pxVect)[8];
-         I.pfc9_py       = (*pyVect)[8];
-         I.pfc9_pz       = (*pzVect)[8];
-         I.pfc9_energy   = (*energyVect)[8];
-         I.pfc9_ifTrack  = (*ifTrackVect)[8];
-         I.pfc10_px       = (*pxVect)[9];
-         I.pfc10_py       = (*pyVect)[9];
-         I.pfc10_pz       = (*pzVect)[9];
-         I.pfc10_energy   = (*energyVect)[9];
-         I.pfc10_ifTrack  = (*ifTrackVect)[9];
-         I.pfc11_px       = (*pxVect)[10];
-         I.pfc11_py       = (*pyVect)[10];
-         I.pfc11_pz       = (*pzVect)[10];
-         I.pfc11_energy   = (*energyVect)[10];
-         I.pfc11_ifTrack  = (*ifTrackVect)[10];
-         I.pfc12_px       = (*pxVect)[11];
-         I.pfc12_py       = (*pyVect)[11];
-         I.pfc12_pz       = (*pzVect)[11];
-         I.pfc12_energy   = (*energyVect)[11];
-         I.pfc12_ifTrack  = (*ifTrackVect)[11];
-         I.pfc13_px       = (*pxVect)[12];
-         I.pfc13_py       = (*pyVect)[12];
-         I.pfc13_pz       = (*pzVect)[12];
-         I.pfc13_energy   = (*energyVect)[12];
-         I.pfc13_ifTrack  = (*ifTrackVect)[12];
-         I.pfc14_px       = (*pxVect)[13];
-         I.pfc14_py       = (*pyVect)[13];
-         I.pfc14_pz       = (*pzVect)[13];
-         I.pfc14_energy   = (*energyVect)[13];
-         I.pfc14_ifTrack  = (*ifTrackVect)[13];
-         I.pfc15_px       = (*pxVect)[14];
-         I.pfc15_py       = (*pyVect)[14];
-         I.pfc15_pz       = (*pzVect)[14];
-         I.pfc15_energy   = (*energyVect)[14];
-         I.pfc15_ifTrack  = (*ifTrackVect)[14];
-         I.pfc16_px       = (*pxVect)[15];
-         I.pfc16_py       = (*pyVect)[15];
-         I.pfc16_pz       = (*pzVect)[15];
-         I.pfc16_energy   = (*energyVect)[15];
-         I.pfc16_ifTrack  = (*ifTrackVect)[15];
-         I.pfc17_px       = (*pxVect)[16];
-         I.pfc17_py       = (*pyVect)[16];
-         I.pfc17_pz       = (*pzVect)[16];
-         I.pfc17_energy   = (*energyVect)[16];
-         I.pfc17_ifTrack  = (*ifTrackVect)[16];
-         I.pfc18_px       = (*pxVect)[17];
-         I.pfc18_py       = (*pyVect)[17];
-         I.pfc18_pz       = (*pzVect)[17];
-         I.pfc18_energy   = (*energyVect)[17];
-         I.pfc18_ifTrack  = (*ifTrackVect)[17];
-         I.pfc19_px       = (*pxVect)[18];
-         I.pfc19_py       = (*pyVect)[18];
-         I.pfc19_pz       = (*pzVect)[18];
-         I.pfc19_energy   = (*energyVect)[18];
-         I.pfc19_ifTrack  = (*ifTrackVect)[18];
-         I.pfc20_px       = (*pxVect)[19];
-         I.pfc20_py       = (*pyVect)[19];
-         I.pfc20_pz       = (*pzVect)[19];
-         I.pfc20_energy   = (*energyVect)[19];
-         I.pfc20_ifTrack  = (*ifTrackVect)[19];
-         I.pfc21_px       = (*pxVect)[20];
-         I.pfc21_py       = (*pyVect)[20];
-         I.pfc21_pz       = (*pzVect)[20];
-         I.pfc21_energy   = (*energyVect)[20];
-         I.pfc21_ifTrack  = (*ifTrackVect)[20];
-         I.pfc22_px       = (*pxVect)[21];
-         I.pfc22_py       = (*pyVect)[21];
-         I.pfc22_pz       = (*pzVect)[21];
-         I.pfc22_energy   = (*energyVect)[21];
-         I.pfc22_ifTrack  = (*ifTrackVect)[21];
-         I.pfc23_px       = (*pxVect)[22];
-         I.pfc23_py       = (*pyVect)[22];
-         I.pfc23_pz       = (*pzVect)[22];
-         I.pfc23_energy   = (*energyVect)[22];
-         I.pfc23_ifTrack  = (*ifTrackVect)[22];
-         I.pfc24_px       = (*pxVect)[23];
-         I.pfc24_py       = (*pyVect)[23];
-         I.pfc24_pz       = (*pzVect)[23];
-         I.pfc24_energy   = (*energyVect)[23];
-         I.pfc24_ifTrack  = (*ifTrackVect)[23];
-         I.pfc25_px       = (*pxVect)[24];
-         I.pfc25_py       = (*pyVect)[24];
-         I.pfc25_pz       = (*pzVect)[24];
-         I.pfc25_energy   = (*energyVect)[24];
-         I.pfc25_ifTrack  = (*ifTrackVect)[24];
-         I.pfc26_px       = (*pxVect)[25];
-         I.pfc26_py       = (*pyVect)[25];
-         I.pfc26_pz       = (*pzVect)[25];
-         I.pfc26_energy   = (*energyVect)[25];
-         I.pfc26_ifTrack  = (*ifTrackVect)[25];
-         I.pfc27_px       = (*pxVect)[26];
-         I.pfc27_py       = (*pyVect)[26];
-         I.pfc27_pz       = (*pzVect)[26];
-         I.pfc27_energy   = (*energyVect)[26];
-         I.pfc27_ifTrack  = (*ifTrackVect)[26];
-         I.pfc28_px       = (*pxVect)[27];
-         I.pfc28_py       = (*pyVect)[27];
-         I.pfc28_pz       = (*pzVect)[27];
-         I.pfc28_energy   = (*energyVect)[27];
-         I.pfc28_ifTrack  = (*ifTrackVect)[27];
-         I.pfc29_px       = (*pxVect)[28];
-         I.pfc29_py       = (*pyVect)[28];
-         I.pfc29_pz       = (*pzVect)[28];
-         I.pfc29_energy   = (*energyVect)[28];
-         I.pfc29_ifTrack  = (*ifTrackVect)[28];
-         I.pfc30_px       = (*pxVect)[29];
-         I.pfc30_py       = (*pyVect)[29];
-         I.pfc30_pz       = (*pzVect)[29];
-         I.pfc30_energy   = (*energyVect)[29];
-         I.pfc30_ifTrack  = (*ifTrackVect)[29];
-         I.pfc31_px       = (*pxVect)[30];
-         I.pfc31_py       = (*pyVect)[30];
-         I.pfc31_pz       = (*pzVect)[30];
-         I.pfc31_energy   = (*energyVect)[30];
-         I.pfc31_ifTrack  = (*ifTrackVect)[30];
-         I.pfc32_px       = (*pxVect)[31];
-         I.pfc32_py       = (*pyVect)[31];
-         I.pfc32_pz       = (*pzVect)[31];
-         I.pfc32_energy   = (*energyVect)[31];
-         I.pfc32_ifTrack  = (*ifTrackVect)[31];
-         I.pfc33_px       = (*pxVect)[32];
-         I.pfc33_py       = (*pyVect)[32];
-         I.pfc33_pz       = (*pzVect)[32];
-         I.pfc33_energy   = (*energyVect)[32];
-         I.pfc33_ifTrack  = (*ifTrackVect)[32];
-         I.pfc34_px       = (*pxVect)[33];
-         I.pfc34_py       = (*pyVect)[33];
-         I.pfc34_pz       = (*pzVect)[33];
-         I.pfc34_energy   = (*energyVect)[33];
-         I.pfc34_ifTrack  = (*ifTrackVect)[33];
-         I.pfc35_px       = (*pxVect)[34];
-         I.pfc35_py       = (*pyVect)[34];
-         I.pfc35_pz       = (*pzVect)[34];
-         I.pfc35_energy   = (*energyVect)[34];
-         I.pfc35_ifTrack  = (*ifTrackVect)[34];
-         I.pfc36_px       = (*pxVect)[35];
-         I.pfc36_py       = (*pyVect)[35];
-         I.pfc36_pz       = (*pzVect)[35];
-         I.pfc36_energy   = (*energyVect)[35];
-         I.pfc36_ifTrack  = (*ifTrackVect)[35];
-         I.pfc37_px       = (*pxVect)[36];
-         I.pfc37_py       = (*pyVect)[36];
-         I.pfc37_pz       = (*pzVect)[36];
-         I.pfc37_energy   = (*energyVect)[36];
-         I.pfc37_ifTrack  = (*ifTrackVect)[36];
-         I.pfc38_px       = (*pxVect)[37];
-         I.pfc38_py       = (*pyVect)[37];
-         I.pfc38_pz       = (*pzVect)[37];
-         I.pfc38_energy   = (*energyVect)[37];
-         I.pfc38_ifTrack  = (*ifTrackVect)[37];
-         I.pfc39_px       = (*pxVect)[38];
-         I.pfc39_py       = (*pyVect)[38];
-         I.pfc39_pz       = (*pzVect)[38];
-         I.pfc39_energy   = (*energyVect)[38];
-         I.pfc39_ifTrack  = (*ifTrackVect)[38];
-         I.pfc40_px       = (*pxVect)[39];
-         I.pfc40_py       = (*pyVect)[39];
-         I.pfc40_pz       = (*pzVect)[39];
-         I.pfc40_energy   = (*energyVect)[39];
-         I.pfc40_ifTrack  = (*ifTrackVect)[39];
+
+
+
+
+
+
+
+         I.pfc1_px       = pxVect.at(0);
+         I.pfc1_py       = pyVect.at(0);
+         I.pfc1_pz       = pzVect.at(0);
+         I.pfc1_energy   = energyVect.at(0);
+         I.pfc1_ifTrack  = ifTrackVect.at(0);
+         I.pfc2_px       = pxVect.at(1);
+         I.pfc2_py       = pyVect.at(1);
+         I.pfc2_pz       = pzVect.at(1);
+         I.pfc2_energy   = energyVect.at(1);
+         I.pfc2_ifTrack  = ifTrackVect.at(1);
+         I.pfc3_px       = pxVect.at(2);
+         I.pfc3_py       = pyVect.at(2);
+         I.pfc3_pz       = pzVect.at(2);
+         I.pfc3_energy   = energyVect.at(2);
+         I.pfc3_ifTrack  = ifTrackVect.at(2);
+         I.pfc4_px       = pxVect.at(3);
+         I.pfc4_py       = pyVect.at(3);
+         I.pfc4_pz       = pzVect.at(3);
+         I.pfc4_energy   = energyVect.at(3);
+         I.pfc4_ifTrack  = ifTrackVect.at(3);
+         I.pfc5_px       = pxVect.at(4);
+         I.pfc5_py       = pyVect.at(4);
+         I.pfc5_pz       = pzVect.at(4);
+         I.pfc5_energy   = energyVect.at(4);
+         I.pfc5_ifTrack  = ifTrackVect.at(4);
+         I.pfc6_px       = pxVect.at(5);
+         I.pfc6_py       = pyVect.at(5);
+         I.pfc6_pz       = pzVect.at(5);
+         I.pfc6_energy   = energyVect.at(5);
+         I.pfc6_ifTrack  = ifTrackVect.at(5);
+         I.pfc7_px       = pxVect.at(6);
+         I.pfc7_py       = pyVect.at(6);
+         I.pfc7_pz       = pzVect.at(6);
+         I.pfc7_energy   = energyVect.at(6);
+         I.pfc7_ifTrack  = ifTrackVect.at(6);
+         I.pfc8_px       = pxVect.at(7);
+         I.pfc8_py       = pyVect.at(7);
+         I.pfc8_pz       = pzVect.at(7);
+         I.pfc8_energy   = energyVect.at(7);
+         I.pfc8_ifTrack  = ifTrackVect.at(7);
+         I.pfc9_px       = pxVect.at(8);
+         I.pfc9_py       = pyVect.at(8);
+         I.pfc9_pz       = pzVect.at(8);
+         I.pfc9_energy   = energyVect.at(8);
+         I.pfc9_ifTrack  = ifTrackVect.at(8);
+         I.pfc10_px       = pxVect.at(9);
+         I.pfc10_py       = pyVect.at(9);
+         I.pfc10_pz       = pzVect.at(9);
+         I.pfc10_energy   = energyVect.at(9);
+         I.pfc10_ifTrack  = ifTrackVect.at(9);
+         I.pfc11_px       = pxVect.at(10);
+         I.pfc11_py       = pyVect.at(10);
+         I.pfc11_pz       = pzVect.at(10);
+         I.pfc11_energy   = energyVect.at(10);
+         I.pfc11_ifTrack  = ifTrackVect.at(10);
+         I.pfc12_px       = pxVect.at(11);
+         I.pfc12_py       = pyVect.at(11);
+         I.pfc12_pz       = pzVect.at(11);
+         I.pfc12_energy   = energyVect.at(11);
+         I.pfc12_ifTrack  = ifTrackVect.at(11);
+         I.pfc13_px       = pxVect.at(12);
+         I.pfc13_py       = pyVect.at(12);
+         I.pfc13_pz       = pzVect.at(12);
+         I.pfc13_energy   = energyVect.at(12);
+         I.pfc13_ifTrack  = ifTrackVect.at(12);
+         I.pfc14_px       = pxVect.at(13);
+         I.pfc14_py       = pyVect.at(13);
+         I.pfc14_pz       = pzVect.at(13);
+         I.pfc14_energy   = energyVect.at(13);
+         I.pfc14_ifTrack  = ifTrackVect.at(13);
+         I.pfc15_px       = pxVect.at(14);
+         I.pfc15_py       = pyVect.at(14);
+         I.pfc15_pz       = pzVect.at(14);
+         I.pfc15_energy   = energyVect.at(14);
+         I.pfc15_ifTrack  = ifTrackVect.at(14);
+         I.pfc16_px       = pxVect.at(15);
+         I.pfc16_py       = pyVect.at(15);
+         I.pfc16_pz       = pzVect.at(15);
+         I.pfc16_energy   = energyVect.at(15);
+         I.pfc16_ifTrack  = ifTrackVect.at(15);
+         I.pfc17_px       = pxVect.at(16);
+         I.pfc17_py       = pyVect.at(16);
+         I.pfc17_pz       = pzVect.at(16);
+         I.pfc17_energy   = energyVect.at(16);
+         I.pfc17_ifTrack  = ifTrackVect.at(16);
+         I.pfc18_px       = pxVect.at(17);
+         I.pfc18_py       = pyVect.at(17);
+         I.pfc18_pz       = pzVect.at(17);
+         I.pfc18_energy   = energyVect.at(17);
+         I.pfc18_ifTrack  = ifTrackVect.at(17);
+         I.pfc19_px       = pxVect.at(18);
+         I.pfc19_py       = pyVect.at(18);
+         I.pfc19_pz       = pzVect.at(18);
+         I.pfc19_energy   = energyVect.at(18);
+         I.pfc19_ifTrack  = ifTrackVect.at(18);
+         I.pfc20_px       = pxVect.at(19);
+         I.pfc20_py       = pyVect.at(19);
+         I.pfc20_pz       = pzVect.at(19);
+         I.pfc20_energy   = energyVect.at(19);
+         I.pfc20_ifTrack  = ifTrackVect.at(19);
+         I.pfc21_px       = pxVect.at(20);
+         I.pfc21_py       = pyVect.at(20);
+         I.pfc21_pz       = pzVect.at(20);
+         I.pfc21_energy   = energyVect.at(20);
+         I.pfc21_ifTrack  = ifTrackVect.at(20);
+         I.pfc22_px       = pxVect.at(21);
+         I.pfc22_py       = pyVect.at(21);
+         I.pfc22_pz       = pzVect.at(21);
+         I.pfc22_energy   = energyVect.at(21);
+         I.pfc22_ifTrack  = ifTrackVect.at(21);
+         I.pfc23_px       = pxVect.at(22);
+         I.pfc23_py       = pyVect.at(22);
+         I.pfc23_pz       = pzVect.at(22);
+         I.pfc23_energy   = energyVect.at(22);
+         I.pfc23_ifTrack  = ifTrackVect.at(22);
+         I.pfc24_px       = pxVect.at(23);
+         I.pfc24_py       = pyVect.at(23);
+         I.pfc24_pz       = pzVect.at(23);
+         I.pfc24_energy   = energyVect.at(23);
+         I.pfc24_ifTrack  = ifTrackVect.at(23);
+         I.pfc25_px       = pxVect.at(24);
+         I.pfc25_py       = pyVect.at(24);
+         I.pfc25_pz       = pzVect.at(24);
+         I.pfc25_energy   = energyVect.at(24);
+         I.pfc25_ifTrack  = ifTrackVect.at(24);
+         I.pfc26_px       = pxVect.at(25);
+         I.pfc26_py       = pyVect.at(25);
+         I.pfc26_pz       = pzVect.at(25);
+         I.pfc26_energy   = energyVect.at(25);
+         I.pfc26_ifTrack  = ifTrackVect.at(25);
+         I.pfc27_px       = pxVect.at(26);
+         I.pfc27_py       = pyVect.at(26);
+         I.pfc27_pz       = pzVect.at(26);
+         I.pfc27_energy   = energyVect.at(26);
+         I.pfc27_ifTrack  = ifTrackVect.at(26);
+         I.pfc28_px       = pxVect.at(27);
+         I.pfc28_py       = pyVect.at(27);
+         I.pfc28_pz       = pzVect.at(27);
+         I.pfc28_energy   = energyVect.at(27);
+         I.pfc28_ifTrack  = ifTrackVect.at(27);
+         I.pfc29_px       = pxVect.at(28);
+         I.pfc29_py       = pyVect.at(28);
+         I.pfc29_pz       = pzVect.at(28);
+         I.pfc29_energy   = energyVect.at(28);
+         I.pfc29_ifTrack  = ifTrackVect.at(28);
+         I.pfc30_px       = pxVect.at(29);
+         I.pfc30_py       = pyVect.at(29);
+         I.pfc30_pz       = pzVect.at(29);
+         I.pfc30_energy   = energyVect.at(29);
+         I.pfc30_ifTrack  = ifTrackVect.at(29);
+         I.pfc31_px       = pxVect.at(30);
+         I.pfc31_py       = pyVect.at(30);
+         I.pfc31_pz       = pzVect.at(30);
+         I.pfc31_energy   = energyVect.at(30);
+         I.pfc31_ifTrack  = ifTrackVect.at(30);
+         I.pfc32_px       = pxVect.at(31);
+         I.pfc32_py       = pyVect.at(31);
+         I.pfc32_pz       = pzVect.at(31);
+         I.pfc32_energy   = energyVect.at(31);
+         I.pfc32_ifTrack  = ifTrackVect.at(31);
+         I.pfc33_px       = pxVect.at(32);
+         I.pfc33_py       = pyVect.at(32);
+         I.pfc33_pz       = pzVect.at(32);
+         I.pfc33_energy   = energyVect.at(32);
+         I.pfc33_ifTrack  = ifTrackVect.at(32);
+         I.pfc34_px       = pxVect.at(33);
+         I.pfc34_py       = pyVect.at(33);
+         I.pfc34_pz       = pzVect.at(33);
+         I.pfc34_energy   = energyVect.at(33);
+         I.pfc34_ifTrack  = ifTrackVect.at(33);
+         I.pfc35_px       = pxVect.at(34);
+         I.pfc35_py       = pyVect.at(34);
+         I.pfc35_pz       = pzVect.at(34);
+         I.pfc35_energy   = energyVect.at(34);
+         I.pfc35_ifTrack  = ifTrackVect.at(34);
+         I.pfc36_px       = pxVect.at(35);
+         I.pfc36_py       = pyVect.at(35);
+         I.pfc36_pz       = pzVect.at(35);
+         I.pfc36_energy   = energyVect.at(35);
+         I.pfc36_ifTrack  = ifTrackVect.at(35);
+         I.pfc37_px       = pxVect.at(36);
+         I.pfc37_py       = pyVect.at(36);
+         I.pfc37_pz       = pzVect.at(36);
+         I.pfc37_energy   = energyVect.at(36);
+         I.pfc37_ifTrack  = ifTrackVect.at(36);
+         I.pfc38_px       = pxVect.at(37);
+         I.pfc38_py       = pyVect.at(37);
+         I.pfc38_pz       = pzVect.at(37);
+         I.pfc38_energy   = energyVect.at(37);
+         I.pfc38_ifTrack  = ifTrackVect.at(37);
+         I.pfc39_px       = pxVect.at(38);
+         I.pfc39_py       = pyVect.at(38);
+         I.pfc39_pz       = pzVect.at(38);
+         I.pfc39_energy   = energyVect.at(38);
+         I.pfc39_ifTrack  = ifTrackVect.at(38);
+         I.pfc40_px       = pxVect.at(39);
+         I.pfc40_py       = pyVect.at(39);
+         I.pfc40_pz       = pzVect.at(39);
+         I.pfc40_energy   = energyVect.at(39);
+         I.pfc40_ifTrack  = ifTrackVect.at(39);
+
+
+
 
 
 
@@ -527,11 +545,11 @@ void ObjectsFormat::FillJetType(JetType& I, const pat::Jet* R, bool isMC) {
     delete max_n;
     delete ptVect;
     delete leading_pfcVect; 
-    delete pxVect;
-    delete pyVect;
-    delete pzVect;
-    delete energyVect;
-    delete ifTrackVect;
+    //delete pxVect;
+    //delete pyVect;
+    //delete pzVect;
+    //delete energyVect;
+    //delete ifTrackVect;
 
     
     //I.pf_Id       = ((R->getJetConstituentsQuick())[nods-1])->pdgId();
