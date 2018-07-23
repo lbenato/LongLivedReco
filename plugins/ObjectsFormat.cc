@@ -305,7 +305,7 @@ void ObjectsFormat::FillJetType(JetType& I, const pat::Jet* R, bool isMC) {
         else ifTrackVect.push_back( 1 );
         */  
       }
-    if (pxVect.size() != 40) cout << "vec size: " << pxVect.size() << endl;
+    
     /*
     // if length of pxVect is not 40, fill the vectors with default values until pxVect has length 40 
     for(unsigned int j = 0; j < 40; j++)

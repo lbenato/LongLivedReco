@@ -2,41 +2,38 @@ import FWCore.ParameterSet.Config as cms
 
 from FWCore.ParameterSet.VarParsing import VarParsing
 
-process = cms.Process("USER")
+process = cms.Process("USERQCD")
 #options = VarParsing('analysis')
 #options.parseArguments()
 
 
 ## Events to process
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(14900) ) #14900
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) ) #14900
 
 ## Input files
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
         
-        #'file:/nfs/dust/cms/user/lbenato/calo_jets/miniaod_calo.root'
-        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_1.root',
-        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_2.root',
-        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_3.root',
-        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_4.root',
-        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_5.root',
-        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_6.root',
-        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_7.root',
-        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_8.root',
-        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_9.root',
-        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_10.root',
-        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_11.root',
-        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_12.root',
-        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_13.root',
-        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_14.root',
-        '/store/user/lbenato/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_Summer16_MINIAODSIM_calojets/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC/RunIISummer16-PU_premix-Moriond17_80X_mcRun2_2016_MINIAODSIM_calojets/180611_172219/0000/miniaod_calo_15.root'
 
+        #'/store/user/lbenato/recluster_ak4Jets_miniaod_29May2018/QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/recluster_ak4Jets_miniaod_29May2018/180611_144000/0000/test_ttbar_4.root'
+
+        'file:/pnfs/desy.de/cms/tier2/store/user/lbenato/recluster_ak4Jets_miniaod_29May2018/QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/recluster_ak4Jets_miniaod_29May2018/180611_143627/0000/test_ttbar_1.root'
+        #'/store/mc/RunIISummer16MiniAODv2/QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/FEA1DF9C-3CBE-E611-BD9F-0025905A6118.root'
+
+        #'file:/nfs/dust/cms/user/lbenato/calo_jets/miniaod_calo.root'
+        
 
 
     )
 )
 
 isData = ('/store/data/' in process.source.fileNames[0])
+isDarkPion = ('HToSSTobbbb' in process.source.fileNames[0])
+
+if isDarkPion:
+    print "Signal!!!!"
+else:
+    print "Background!!!!"
 
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
@@ -54,7 +51,7 @@ elif not(isData):
 process.GlobalTag = GlobalTag (process.GlobalTag, GT)
 
 process.TFileService = cms.Service( "TFileService",
-    fileName = cms.string('op_calo_t1.root'),# if len(options.outputFile)==0 else options.outputFile),
+    fileName = cms.string('op_calo_qcd_t1.root'),# if len(options.outputFile)==0 else options.outputFile),
     closeFileFast = cms.untracked.bool(True),
 )
 
@@ -900,6 +897,7 @@ process.reconstruction = cms.EDAnalyzer('RecoStudiesCalo',
     writeNFatJets = cms.int32(0),
     writeNGenBquarks = cms.int32(4),
     writeNGenLongLiveds = cms.int32(2),
+    isSignal = cms.bool(isDarkPion),
     verbose = cms.bool(False),
     verboseTrigger  = cms.bool(False),
 )

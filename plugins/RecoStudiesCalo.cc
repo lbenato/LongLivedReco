@@ -130,7 +130,7 @@ class RecoStudiesCalo : public edm::one::EDAnalyzer<edm::one::SharedResources>
     
 
     TTree* tree;
-    bool isVerbose, isVerboseTrigger;
+    bool isDarkPionSignal, isVerbose, isVerboseTrigger;
     bool isMC;
     long int EventNumber, LumiNumber, RunNumber, nPV;
     
@@ -180,6 +180,7 @@ RecoStudiesCalo::RecoStudiesCalo(const edm::ParameterSet& iConfig):
     WriteNFatJets(iConfig.getParameter<int>("writeNFatJets")),
     WriteNGenBquarks(iConfig.getParameter<int>("writeNGenBquarks")),
     WriteNGenLongLiveds(iConfig.getParameter<int>("writeNGenLongLiveds")),
+    isDarkPionSignal(iConfig.getParameter<bool> ("isSignal")),
     isVerbose(iConfig.getParameter<bool> ("verbose")),
     isVerboseTrigger(iConfig.getParameter<bool> ("verboseTrigger"))
     
@@ -194,7 +195,7 @@ RecoStudiesCalo::RecoStudiesCalo(const edm::ParameterSet& iConfig):
     thePileupAnalyzer   = new PileupAnalyzer(PileupPSet, consumesCollector());
     theTriggerAnalyzer  = new TriggerAnalyzer(TriggerPSet, consumesCollector());
     
-
+    
 
     std::vector<std::string> TriggerList(TriggerPSet.getParameter<std::vector<std::string> >("paths"));
     for(unsigned int i = 0; i < TriggerList.size(); i++) TriggerMap[ TriggerList[i] ] = false;
@@ -216,8 +217,9 @@ RecoStudiesCalo::RecoStudiesCalo(const edm::ParameterSet& iConfig):
     edm::InputTag IT_genJetToken = edm::InputTag("slimmedGenJets");//Lisa
     genJetToken= consumes<reco::GenJetCollection>(IT_genJetToken);//Lisa
 
-    edm::InputTag IT_caloJets = edm::InputTag("ak4CaloJets");
-    caloJetToken = consumes<reco::CaloJetCollection>(IT_caloJets);
+    //brian
+    //edm::InputTag IT_caloJets = edm::InputTag("ak4CaloJets");
+    //caloJetToken = consumes<reco::CaloJetCollection>(IT_caloJets);
 
     if(isVerbose) std::cout << "CONSTRUCTOR" << std::endl;
     if(isVerbose) std::cout << "ONLY EVENTS WITH 4 GEN B QUARKS IN ACCEPTANCE!!!!!!!!" << std::endl;
@@ -336,6 +338,8 @@ RecoStudiesCalo::~RecoStudiesCalo()
 // member functions
 //
 
+
+
 // ------------ method called for each event  ------------
 void
 RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
@@ -346,7 +350,8 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
 
     // Initialize types
-    for(int i = 0; i < WriteNJets; i++) ObjectsFormat::ResetJetType(Jets[i]);
+    for(int i = 0; i < 10; i++) ObjectsFormat::ResetJetType(Jets[i]);  //<==== for qcd WriteNJets = 10
+
     for(int i = 0; i < 4; i++) ObjectsFormat::ResetJetType(MatchedJets[i]);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     for(int i = 0; i < 4; i++) ObjectsFormat::ResetJetType(MatchedCHSJets[i]);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     for(int i = 0; i < 4; i++) ObjectsFormat::ResetJetType(MatchedPuppiJets[i]);//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -398,7 +403,7 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         }
     }
 
-
+    
     //BadChCand and BadPFMuon filters
     edm::Handle<bool> filterBadChCand; 
     iEvent.getByToken(badChCandFilterToken, filterBadChCand);
@@ -431,17 +436,24 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     
     nGenBquarks = GenBquarksVect.size();
 
-    if(nGenBquarks<4)
-      {
-        GenBquarksVect.clear();
-        GenLongLivedVect.clear();
-        return; //First step: only full reconstruction!
-      }
+cout << "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << endl;
+
+ if(isDarkPionSignal) //do this check only for signal; we don't need 4 b quarks for background
+     {
+       if(nGenBquarks<4)
+         {
+	   GenBquarksVect.clear();
+	   GenLongLivedVect.clear();
+
+	   cout << "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << endl;
+
+	   return; //First step: only full reconstruction!
+         }
+    
+     }
     
 
-    
-
-
+    cout << "??????????????????????????????????????????????????????????????????????" << endl;
     // Pu weight
     PUWeight     = thePileupAnalyzer->GetPUWeight(iEvent);
     
@@ -461,6 +473,8 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~test
     //pat::Jet *jj = new pat::Jet;
     //jj = &JetsVect[0];
+ 
+    //cout << "??????????????????????????????????????????????????????????????????????" << endl;    
 
     //pat::Jet jjj = JetsVect[0]; //0
     //reco::Candidate * jjj = JetsVect[0].daughter(0);    
@@ -491,6 +505,9 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     //cout << ((JetsVect[0].getJetConstituentsQuick())[0])->energy() << endl;
     //cout << ((JetsVect[0].getJetConstituentsQuick())[0])->numberOfDaughters() << endl;
     //int nods = JetsVect[0].numberOfDaughters();
+
+   
+/*
     if (nJets != 0){
       int nods = JetsVect.at(0).numberOfDaughters();
 //cout <<"!!!!!!debug!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
@@ -503,6 +520,8 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     cout << "~~~~~~~charge~~~~~~~~~~~" << endl;
 
 }
+*/
+
     //delete jjj;
 
 
@@ -733,7 +752,7 @@ RecoStudiesCalo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 void 
 RecoStudiesCalo::beginJob()
 {
-    for(int i = 0; i < WriteNJets; i++) Jets.push_back( JetType() ); //====> for qcd WriteNJets = 10
+    for(int i = 0; i < 10; i++) Jets.push_back( JetType() ); //====> for qcd WriteNJets = 10
 
     for(int i = 0; i < 4; i++) MatchedJets.push_back( JetType() );
     for(int i = 0; i < 4; i++) MatchedCHSJets.push_back( JetType() );
@@ -747,9 +766,13 @@ RecoStudiesCalo::beginJob()
     for(int i = 0; i < WriteNGenLongLiveds; i++) GenLongLiveds.push_back( GenPType() );
 
     //Set branches for objects
-    //for(int i = 0; i < WriteNJets; i++) tree->Branch(("Jet"+std::to_string(i+1)).c_str(), &(Jets[i].pt), ObjectsFormat::ListJetType().c_str());
+
+    for(int i = 0; i < 10; i++) tree->Branch(("Jet"+std::to_string(i+1)).c_str(), &(Jets[i].pt), ObjectsFormat::ListJetType().c_str()); // WriteNJets_temp = 10 only for qcd [WriteNJets]
+    
     //for(int i = 0; i < 4; i++) tree->Branch(("MatchedJet"+std::to_string(i+1)).c_str(), &(MatchedJets[i].pt), ObjectsFormat::ListJetType().c_str());
-    for(int i = 0; i < 4; i++) tree->Branch(("MatchedCHSJet"+std::to_string(i+1)).c_str(), &(MatchedCHSJets[i].pt), ObjectsFormat::ListJetType().c_str());
+    
+    //for(int i = 0; i < 4; i++) tree->Branch(("MatchedCHSJet"+std::to_string(i+1)).c_str(), &(MatchedCHSJets[i].pt), ObjectsFormat::ListJetType().c_str());
+    
     /*
     for(int i = 0; i < 4; i++) tree->Branch(("MatchedPuppiJet"+std::to_string(i+1)).c_str(), &(MatchedPuppiJets[i].pt), ObjectsFormat::ListJetType().c_str());
     for(int i = 0; i < 4; i++) tree->Branch(("MatchedCaloJet"+std::to_string(i+1)).c_str(), &(MatchedCaloJets[i].pt), ObjectsFormat::ListCaloJetType().c_str());
